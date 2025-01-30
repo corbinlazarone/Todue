@@ -56,6 +56,36 @@ export const signInAction = async (formData: FormData) => {
   return redirect("/protected");
 };
 
+export const signInWithGoogle = async () => {
+  const supabase = await createClient();
+  const headersList = await headers();
+  const origin = headersList.get("origin") || process.env.NEXT_PUBLIC_BASE_URL;
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback?next=/`,
+      scopes:
+        "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
+    },
+  });
+
+  if (error) {
+    console.error("OAuth error:", error.message);
+    return redirect("/sign-in?error=OAuth+failed");
+  }
+
+  if (data.url) {
+    return redirect(data.url);
+  }
+
+  return redirect("/sign-in?error=No+URL+returned");
+};
+
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const supabase = await createClient();

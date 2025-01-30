@@ -1,6 +1,16 @@
 import Countries from "@/components/countries/Countries";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+
+export default async function CountriesPage() {
+    const supabase = await createClient();
+
+    const { data: { user }, } = await supabase.auth.getUser();
 
 
-export default function CountriesPage() {
+    if (!user) {
+        return redirect("/sign-in");
+    }
+
     return <Countries />
 }
