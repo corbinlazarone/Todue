@@ -1,3 +1,7 @@
+/**
+ * Handle Sign up functions from actions.ts file 
+ */
+
 export default async function Signup() {
   return (
     <div>

@@ -1,7 +1,5 @@
+import LandingComp from "@/components/landing";
+
 export default async function Home() {
-  return (
-    <div>
-      <h1>Landing Page</h1>
-    </div>
-  );
+  return <LandingComp />;
 }
