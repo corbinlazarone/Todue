@@ -1,12 +1,451 @@
-import Link from "next/link";
+"use client";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import {
+  Check,
+  Edit,
+  HistoryIcon,
+  Linkedin,
+  Sparkles,
+  Sun,
+  Twitter,
+  Upload,
+} from "lucide-react";
+import { AnimatedBeamDemo } from "./animated-beam-landing";
+import { PulsatingButton } from "./ui/pulsating-button";
+import FeatureRequest from "./feature-request";
+import FAQ from "./faq-section";
+import PricingCard from "./pricing/pricing-card";
+import { User } from "@supabase/supabase-js";
 
-export default function LandingComp() {
+const keyFeatures = [
+  {
+    icon: <Sparkles className="h-6 w-6 text-white" />,
+    title: "Smart Extraction",
+    description:
+      "Advanced AI automatically detects and extracts important dates and assignments",
+  },
+  {
+    icon: <Edit className="h-6 w-6 text-white" />,
+    title: "Event Customazation",
+    description: "Add customaziable calendar events",
+  },
+  {
+    icon: <HistoryIcon className="h-6 w-6 text-white" />,
+    title: "Upload History",
+    description: "See syllabus history and assignment event history",
+  },
+];
+
+const howItWorks = [
+  {
+    icon: <Upload className="h-6 w-6 text-white" />,
+    title: "Upload Syllabus",
+    description: "Easily upload one or multiple syllabi.",
+  },
+  {
+    icon: <Edit className="h-6 w-6 text-white" />,
+    title: "Edit or Add Assignments",
+    description:
+      "Edit assignments our AI has detected or manually add new ones.",
+  },
+  {
+    icon: <Check className="h-6 w-6 text-white" />,
+    title: "Submit to Google Calendar",
+    description:
+      "Submit your assignments to Google Calendar to save time and stay organized.",
+  },
+];
+
+const fadeInFromBottom = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
+
+interface LandingCompProps {
+  user: User | null;
+}
+
+export default function LandingComp({ user }: LandingCompProps) {
   return (
-    <div>
-      <h1>Todues Landing Page</h1>
-      <button>
-        <Link href="/sign-in">Go to Sign in Page</Link>
-      </button>
-    </div>
+    <>
+      <motion.header
+        initial="hidden"
+        animate="visible"
+        className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 border-b border-gray-100"
+      >
+        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+          {/* Branding Section */}
+          <div className="flex items-center gap-3">
+            <Image src={"/logo.png"} alt="Todue logo" width={24} height={24} />
+            <span className="font-bold text-lg bg-clip-text text-indigo-600">
+              Todue
+            </span>
+          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center justify-center gap-8">
+            <div className="flex items-center gap-6">
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
+                Dashboard
+              </button>
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
+                Pricing
+              </button>
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
+                How it Works
+              </button>
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
+                Contact
+              </button>
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
+                Blogs
+              </button>
+              <button>
+                <Sun size={20} />
+              </button>
+            </div>
+            <button className="bg-[#6366F1] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#4F46ES] transition-all duration-300 hover:shadow-lg">
+              {"Sign In"}
+            </button>
+          </nav>
+        </div>
+      </motion.header>
+
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16 sm:mt-20">
+        {/* Hero Section */}
+        <section className="py-28 px-4 md:px-6">
+          <div className="max-w-6xl mx-auto text-center">
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 px-4 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
+            >
+              Effortlessly Manage Your Semester <br />
+              No More Missed Deadlines
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg md:text-xl max-w-3xl mx-auto px-4 text-gray-700 mb-12"
+            >
+              Todue automatically extracts assignments and exams from your
+              syllabus, so you can focus on what matters most.
+            </motion.p>
+            <div className="flex justify-center">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
+                <PulsatingButton>Start Now</PulsatingButton>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* New Demo Video Section */}
+        <section className="py-8 px-4 md:px-6 flex justify-center">
+          <div className="w-full max-w-5xl">
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#6366F1] to-[#4F46E5] rounded-2xl blur opacity-30"></div>
+              <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden">
+                {/* Video Container */}
+                <div className="relative">
+                  <div className="w-full h-[450px] md:h-[600px] rounded-xl overflow-hidden">
+                    {/* Replace with your video */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Key Features Section */}
+        <section className="py-20 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.h2
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className={`text-4xl font-bold text-center mb-16 text-gray-900`}
+            >
+              Key Features
+            </motion.h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {keyFeatures.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  className={`group relative bg-white/80 backdrop-blur-lg rounded-2xl p-6 hover:shadow-xl transition-all duration-300`}
+                >
+                  <div className="relative z-10">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center mb-6">
+                      {feature.icon}
+                    </div>
+                    <h3 className=" text-xl font-semibold mb-4 text-gray-900">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-700">{feature.description}</p>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Integrations Section */}
+        <section className="py-20 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                Seamless Integration
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Connect Todue with your favorite calendar app for automatic
+                event synchronization
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              className="relative mx-auto bg-gradient-to-b from-white to-gray-50 rounded-2xl p-12 shadow-xl flex items-center justify-center"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl" />
+
+              {/* Center container for AnimatedBeamDemo */}
+              <div className="relative w-full flex justify-center items-center">
+                <AnimatedBeamDemo />
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section className="py-20 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.h2
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className={`text-4xl font-bold text-center mb-16 text-gray-900`}
+            >
+              How it Works
+            </motion.h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {howItWorks.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  className={`group relative bg-white/80 backdrop-blur-lg rounded-2xl p-6 hover:shadow-xl transition-all duration-300`}
+                >
+                  <div className="relative z-10">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center mb-6">
+                      {feature.icon}
+                    </div>
+                    <h3 className=" text-xl font-semibold mb-4 text-gray-900">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-700">{feature.description}</p>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Feature Request / Contact */}
+        <section className="py-20">
+          <FeatureRequest />
+        </section>
+
+        {/* Pricing */}
+        <section className="py-20 relative overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Transparent Pricing
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Looking for an Enterprise plan? Contact us at
+              corbinlazarone@todue.com
+            </p>
+          </motion.div>
+
+          {/* Centered Pricing Cards */}
+          <div className="max-w-full mx-auto px-4 md:px-8">
+            <div className="grid place-items-center">
+              <PricingCard user={user} />
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-16 bg-gray-50">
+          <FAQ />
+        </section>
+
+        {/* CTA Section */}
+        <motion.section
+          initial="hidden"
+          animate="visible"
+          variants={fadeInFromBottom}
+          transition={{ delay: 0.8 }}
+          className="py-12 sm:py-16 px-4 sm:px-0"
+        >
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 sm:p-12 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">
+              Stay on Top of Your Semester with Ease
+            </h2>
+            <p className="text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
+              Let Todue handle your deadlines—automatically extracting
+              assignments and exams so you can focus on what truly matters.
+            </p>
+            <button className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-indigo-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold transition-all duration-300 hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-lg">
+              Get Started Now
+              <svg
+                className="w-5 h-5 ml-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        </motion.section>
+
+        <footer className="bg-white text-gray-800 py-12 mt-20">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Branding Section */}
+              <div className="flex flex-col">
+                <h2 className="text-2xl font-bold text-indigo-600">Todue</h2>
+                <p className="mt-3 text-gray-600">
+                  Effortlessly manage your semester and never miss a deadline.
+                </p>
+              </div>
+
+              {/* Navigation */}
+              <div className="flex flex-col">
+                <h3 className="text-lg font-semibold text-indigo-600">
+                  Company
+                </h3>
+                <ul className="mt-3 space-y-2">
+                  <li>
+                    <a
+                      href="#"
+                      className="text-gray-600 hover:text-indigo-600 transition"
+                    >
+                      Dashboard
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="text-gray-600 hover:text-indigo-600 transition"
+                    >
+                      Pricing
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="text-gray-600 hover:text-indigo-600 transition"
+                    >
+                      How it Works
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="text-gray-600 hover:text-indigo-600 transition"
+                    >
+                      Contact
+                    </a>
+                  </li>
+                  <li>
+                    <a>Blogs</a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Legal */}
+              <div className="flex flex-col">
+                <h3 className="text-lg font-semibold text-indigo-600">Legal</h3>
+                <ul className="mt-3 space-y-2">
+                  <li>
+                    <a>Terms of Service</a>
+                  </li>
+                  <li>
+                    <a>Privacy Policy</a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Social Media Links */}
+              <div className="flex flex-col">
+                <h3 className="text-lg font-semibold text-indigo-600">
+                  Follow Us
+                </h3>
+                <div className="mt-3 flex space-x-4">
+                  <a
+                    href="#"
+                    className="text-gray-600 hover:text-indigo-600 transition"
+                  >
+                    <i className="fab fa-twitter">
+                      <Twitter />
+                    </i>
+                  </a>
+                  <a
+                    href="#"
+                    className="text-gray-600 hover:text-indigo-600 transition"
+                  >
+                    <i className="fab fa-linkedin">
+                      <Linkedin />
+                    </i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="border-t border-gray-300 mt-10 pt-6 text-center text-gray-500 text-sm">
+            &copy; {new Date().getFullYear()} Todue. All rights reserved.
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
