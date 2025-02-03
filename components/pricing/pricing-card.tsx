@@ -1,4 +1,3 @@
-"use client";
 import { User } from "@supabase/supabase-js";
 import { Check } from "lucide-react";
 
@@ -55,41 +54,48 @@ export default function PricingCard({ user }: PricingPlans) {
   ];
 
   return (
-    <div className="max-w-full">
-      <div className="grid md:grid-cols-2 gap-10">
+    <div className="w-full max-w-7xl mx-auto px-4">
+      <div className="grid md:grid-cols-2 gap-8">
         {plans.map((plan) => (
           <div
             key={plan.name}
-            className="rounded-2xl p-6 border-2 border-indigo-500 bg-white shadow-lg hover:shadow-xl transition duration-300"
+            className="rounded-3xl p-8 border-2 border-indigo-500 bg-white shadow-lg hover:shadow-xl transition duration-300 relative overflow-hidden w-full"
           >
-            <h3 className="text-xl font-semibold text-gray-900">{plan.name}</h3>
-            <div className="flex items-baseline gap-1 mb-4">
-              <span className={`text-3xl font-bold text-gray-900`}>
-                ${plan.price}
-              </span>
-              <span
-                className={`text-sm text-gray-500`}
-              >
-                {plan.duration}
-              </span>
-            </div>
+            {/* Background gradient effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 opacity-50" />
+            
+            {/* Content */}
+            <div className="relative">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+              <div className="flex items-baseline gap-2 mb-6">
+                <span className="text-5xl font-bold text-indigo-600">
+                  ${plan.price}
+                </span>
+                <span className="text-lg text-gray-600">
+                  {plan.duration}
+                </span>
+              </div>
 
-            <div className="space-y-3">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-gray-600" />
-                  <span className="text-gray-600">{feature.name}</span>
-                </div>
-              ))}
-            </div>
-            <div className="pt-10 space-y-2">
-              <a
-                className="w-full py-3 px-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-center rounded-md shadow-md hover:from-indigo-600 hover:to-purple-700 transition ease-in-out duration-300"
-                target="_blank"
-                href={plan.link + "?prefilled_email=" + user?.email}
-              >
-                Subscribe Now
-              </a>
+              <div className="space-y-4 mb-8">
+                {features.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center">
+                      <Check className="h-3 w-3 text-indigo-600" />
+                    </div>
+                    <span className="text-gray-700">{feature.name}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-6">
+                <a
+                  className="block w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center text-lg font-semibold rounded-xl shadow-md hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5"
+                  target="_blank"
+                  href={plan.link + "?prefilled_email=" + user?.email}
+                >
+                  Subscribe Now
+                </a>
+              </div>
             </div>
           </div>
         ))}

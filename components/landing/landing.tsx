@@ -1,22 +1,25 @@
 "use client";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import {
   Check,
   Edit,
   HistoryIcon,
   Linkedin,
+  Menu,
   Sparkles,
   Sun,
   Twitter,
   Upload,
+  X,
 } from "lucide-react";
 import { AnimatedBeamDemo } from "./animated-beam-landing";
-import { PulsatingButton } from "./ui/pulsating-button";
+import { PulsatingButton } from "../ui/pulsating-button";
 import FeatureRequest from "./feature-request";
 import FAQ from "./faq-section";
-import PricingCard from "./pricing/pricing-card";
+import PricingCard from "../pricing/pricing-card";
 import { User } from "@supabase/supabase-js";
+import { useEffect, useState } from "react";
 
 const keyFeatures = [
   {
@@ -66,11 +69,48 @@ const fadeInFromBottom = {
   },
 };
 
+// navigation item animation variants
+const itemVariants = {
+  closed: { opacity: 0, x: -10 },
+  open: { opacity: 1, x: 0 },
+};
+
+// mobile menu animation variants
+const menuVariants = {
+  closed: {
+    opacity: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeInOut",
+    },
+  },
+  open: {
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      ease: "easeInOut",
+    },
+  },
+};
+
 interface LandingCompProps {
   user: User | null;
 }
 
 export default function LandingComp({ user }: LandingCompProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMenuOpen]);
+
   return (
     <>
       <motion.header
@@ -113,9 +153,92 @@ export default function LandingComp({ user }: LandingCompProps) {
               {"Sign In"}
             </button>
           </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? (
+              <X className="w-5 h-5 text-gray-600" />
+            ) : (
+              <Menu className="w-5 h-5 text-gray-600" />
+            )}
+          </button>
         </div>
+
+           {/* Mobile Navigation */}
+           <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={menuVariants}
+              className="md:hidden border-t border-gray-100 bg-white overflow-hidden"
+            >
+              <motion.div
+                className="max-w-[1200px] mx-auto px-6 py-4 flex flex-col gap-4"
+                variants={{
+                  open: {
+                    transition: {
+                      staggerChildren: 0.1,
+                    },
+                  },
+                }}
+              >
+                <motion.button
+                  className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
+                  variants={itemVariants}
+                >
+                  Dashboard
+                </motion.button>
+                <motion.button
+                  className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
+                  variants={itemVariants}
+                >
+                  Pricing
+                </motion.button>
+                <motion.button
+                  className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
+                  variants={itemVariants}
+                >
+                  How it Works
+                </motion.button>
+                <motion.button
+                  className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
+                  variants={itemVariants}
+                >
+                  Contact
+                </motion.button>
+                <motion.button
+                  className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
+                  variants={itemVariants}
+                >
+                  Blogs
+                </motion.button>
+                {user && (
+                  <motion.button
+                    className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
+                    variants={itemVariants}
+                  >
+                    Channels
+                  </motion.button>
+                )}
+                <motion.button
+                  className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-indigo-700 transition-all duration-300 w-full"
+                  variants={itemVariants}
+                >
+                  {user ? "Sign Out" : "Get Started"}
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.header>
 
+      {/* Main Content */}
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16 sm:mt-20">
         {/* Hero Section */}
         <section className="py-28 px-4 md:px-6">

@@ -1,4 +1,4 @@
-import LandingComp from "@/components/landing";
+import LandingComp from "@/components/landing/landing";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function Home() {
