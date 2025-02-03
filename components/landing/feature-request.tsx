@@ -1,7 +1,5 @@
 "use client";
 import { motion } from "framer-motion";
-import { Paperclip, Send } from "lucide-react";
-import { PulsatingButton } from "./ui/pulsating-button";
 import { useState } from "react";
 
 export default function FeatureRequest() {
@@ -70,6 +68,7 @@ export default function FeatureRequest() {
                 id="name"
                 name="name"
                 value={formData.name}
+                placeholder="John doe"
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
@@ -88,6 +87,7 @@ export default function FeatureRequest() {
                 id="email"
                 name="email"
                 value={formData.email}
+                placeholder="example@gmail.com"
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
@@ -105,6 +105,7 @@ export default function FeatureRequest() {
             <textarea
               id="message"
               name="message"
+              placeholder="I love this tool :)"
               value={formData.message}
               onChange={handleInputChange}
               rows={6}
