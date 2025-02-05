@@ -1,25 +1,62 @@
 "use client";
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Image from "next/image";
 import FormInput from "@/components/ui/input";
+import { signInAction } from "@/app/actions";
+import PopupAlert from "@/components/ui/popup-alert";
+import { redirect, useRouter } from "next/navigation";
 
 interface FormData {
   email: string;
   password: string;
+  confirmPassword: string;
+  callbackUrl: string;
 }
 
-const SignInPage = () => {
+interface Alert {
+  type?: "info" | "success" | "warning" | "error";
+  message: string;
+}
+
+export default function SignIn() {
+  const router = useRouter();
+  const [alert, setAlert] = useState<Alert | null>(null);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     email: "",
-    password: ""
-  })
+    password: "",
+    confirmPassword: "",
+    callbackUrl: "",
+  });
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = async (event: any) => {
     event.preventDefault();
-    console.log(formData);
-  }
+
+    try {
+      setLoading(true);
+      const response = await signInAction(formData);
+
+      setAlert({
+        type: response.type,
+        message: response.message,
+      });
+
+      if (response.type === "success") {
+        // navigate to dashboard page.
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      console.log("Unexpected Sign in Error: ", error);
+      setAlert({
+        type: "error",
+        message: "Unexpected error occuried. Please Try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -38,6 +75,16 @@ const SignInPage = () => {
           </div>
         </div>
       </motion.header>
+
+      <AnimatePresence>
+        {alert && (
+          <PopupAlert
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert(null)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -68,27 +115,27 @@ const SignInPage = () => {
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <FormInput
-                htmlFor="email"
+                id="email"
                 required={true}
                 labelText="Email"
                 placeHolderText="Enter your email"
                 type="email"
                 name="email"
                 onChange={(event) => {
-                  setFormData({ ...formData, email: event.target.value})
+                  setFormData({ ...formData, email: event.target.value });
                 }}
               />
 
               <FormInput
-                 htmlFor="password"
-                 required={true}
-                 labelText="Password"
-                 placeHolderText="Enter your password"
-                 type="password"
-                 name="password"
-                 onChange={(event) => {
-                   setFormData({ ...formData, password: event.target.value})
-                 }}
+                id="password"
+                required={true}
+                labelText="Password"
+                placeHolderText="Enter your password"
+                type="password"
+                name="password"
+                onChange={(event) => {
+                  setFormData({ ...formData, password: event.target.value });
+                }}
               />
 
               <div className="flex justify-center">
@@ -102,16 +149,26 @@ const SignInPage = () => {
 
               <button
                 type="submit"
-                className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-300"
+                disabled={loading}
+                className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Sign In
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </button>
             </form>
 
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
-                <button className="text-indigo-600 hover:text-indigo-500 font-medium">
+                <button className="text-indigo-600 hover:text-indigo-500 font-medium" onClick={() => {
+                  redirect("/sign-up")
+                }}>
                   Sign up now
                 </button>
               </p>
@@ -135,6 +192,4 @@ const SignInPage = () => {
       </div>
     </div>
   );
-};
-
-export default SignInPage;
+}

@@ -5,18 +5,66 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export const signUpAction = async (formData: FormData) => {
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
+interface FormData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  callbackUrl: string;
+}
+
+interface AuthResponse {
+  type?: "info" | "success" | "warning" | "error";
+  message: string;
+}
+
+export const signUpAction = async (
+  formData: FormData
+): Promise<AuthResponse> => {
+  const email = formData.email;
+  const password = formData.password;
+  const confirmPassword = formData.confirmPassword;
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
   if (!email || !password) {
-    return encodedRedirect(
-      "error",
-      "/sign-up",
-      "Email and password are required",
-    );
+    return {
+      type: "warning",
+      message: "Email and password are required.",
+    };
+  }
+
+  // password validation checks
+  const hasMinLength = password.length >= 8;
+  const hasCapital = /[A-Z]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  const validationErrors = [];
+
+  if (!hasMinLength) {
+    validationErrors.push("Must be at least 8 characters long");
+  }
+  if (!hasCapital) {
+    validationErrors.push("Must include a capital letter");
+  }
+  if (!hasSpecialChar) {
+    validationErrors.push("Must include a special character");
+  }
+
+  if (validationErrors.length > 0) {
+    return {
+      type: "warning",
+      message:
+        "Password requirements:\n" +
+        validationErrors.map((error) => `• ${error}`).join("\n"),
+    };
+  }
+
+  // check if password equals confirm password
+  if (password != confirmPassword) {
+    return {
+      type: "warning",
+      message: "Passwords Must Match.",
+    };
   }
 
   const { error } = await supabase.auth.signUp({
@@ -29,20 +77,31 @@ export const signUpAction = async (formData: FormData) => {
 
   if (error) {
     console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
+    return {
+      type: "error",
+      message: "Unexpected error creating your account. Please Try Again."
+    };
   } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
-    );
+    return {
+      type: "success",
+      message: "Thanks for signing up! Please check your email for a verification link."
+    }
   }
 };
 
-export const signInAction = async (formData: FormData) => {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+export const signInAction = async (
+  formData: FormData
+): Promise<AuthResponse> => {
+  const email = formData.email;
+  const password = formData.password;
   const supabase = await createClient();
+
+  if (!email || !password) {
+    return {
+      type: "info",
+      message: "Email and password are required",
+    };
+  }
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -50,10 +109,17 @@ export const signInAction = async (formData: FormData) => {
   });
 
   if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+    console.error(error.code + " " + error.message);
+    return {
+      type: "error",
+      message: "Invalid Credentials. Please Try again",
+    };
   }
 
-  return redirect("/protected");
+  return {
+    type: "success",
+    message: "Thanks for Signing In!",
+  };
 };
 
 export const signInWithGoogle = async () => {
@@ -87,10 +153,10 @@ export const signInWithGoogle = async () => {
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
-  const email = formData.get("email")?.toString();
+  const email = formData.email;
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
-  const callbackUrl = formData.get("next")?.toString();
+  const callbackUrl = formData.callbackUrl;
 
   if (!email) {
     return encodedRedirect("error", "/forgot-password", "Email is required");
@@ -103,7 +169,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       "/forgot-password",
-      "Could not reset password",
+      "Could not reset password"
     );
   }
 
@@ -114,21 +180,21 @@ export const forgotPasswordAction = async (formData: FormData) => {
   return encodedRedirect(
     "success",
     "/forgot-password",
-    "Check your email for a link to reset your password.",
+    "Check your email for a link to reset your password."
   );
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
   const supabase = await createClient();
 
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
+  const password = formData.password;
+  const confirmPassword = formData.confirmPassword;
 
   if (!password || !confirmPassword) {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password and confirm password are required",
+      "Password and confirm password are required"
     );
   }
 
@@ -136,7 +202,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Passwords do not match",
+      "Passwords do not match"
     );
   }
 
@@ -148,7 +214,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password update failed",
+      "Password update failed"
     );
   }
 

@@ -1,7 +1,7 @@
 import { ChangeEventHandler } from "react";
 
 interface FormInputProps {
-  htmlFor: string;
+  id: string;
   required: boolean;
   labelText: string;
   placeHolderText: string;
@@ -11,7 +11,7 @@ interface FormInputProps {
 }
 
 export default function FormInput({
-  htmlFor,
+  id,
   required,
   labelText,
   placeHolderText,
@@ -22,7 +22,7 @@ export default function FormInput({
   return (
     <div>
       <label
-        htmlFor={htmlFor}
+        id={id}
         className="block text-sm font-medium text-gray-700 mb-2"
       >
         {labelText}
