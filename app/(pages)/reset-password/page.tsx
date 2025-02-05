@@ -1,12 +1,13 @@
 "use client";
 
-import Image from "next/image";
+import { resetPasswordAction } from "@/app/actions";
+import FormInput from "@/components/ui/input";
 import PopupAlert from "@/components/ui/popup-alert";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import FormInput from "@/components/ui/input";
-import { forgotPasswordAction } from "@/app/actions";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface FormData {
   email: string;
@@ -20,43 +21,49 @@ interface Alert {
   message: string;
 }
 
-export default function ForgotPassword() {
+export default function ResetPassword() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<Alert | null>(null);
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
     confirmPassword: "",
-    callbackUrl: ""
-  })
+    callbackUrl: "",
+  });
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
 
     try {
       setLoading(true);
-      const response = await forgotPasswordAction(formData);
+      const response = await resetPasswordAction(formData);
 
       setAlert({
         type: response.type,
         message: response.message
       });
 
+      if (response.type === "success") {
+        // prompt user to login in with new password.
+        router.push("/sign-in");
+      }
+
     } catch (error: any) {
-      console.log("Unexpected Forgot Password Error: ", error);
+      console.log("Unexpected Reset Password Error: ", error);
       setAlert({
         type: "error",
-        message: "Unexpected error occuried. Please Try again."
+        message: "Unexpected error occuried. Please Try again.",
       });
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-       {/* Header */}
-       <motion.header
+      {/* Header */}
+      <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 border-b border-gray-100"
@@ -76,7 +83,7 @@ export default function ForgotPassword() {
           <PopupAlert
             message={alert.message}
             type={alert.type}
-            duration={10000}
+            duration={3000}
             onClose={() => setAlert(null)}
           />
         )}
@@ -84,9 +91,9 @@ export default function ForgotPassword() {
 
       {/* Main Content */}
       <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md" >
-           {/* Back Button */}
-           <motion.button
+        <div className="w-full max-w-md">
+          {/* Back Button */}
+          <motion.button
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors mb-8"
@@ -103,22 +110,39 @@ export default function ForgotPassword() {
             className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 space-y-8"
           >
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">Forgot Password</h2>
+              <h2 className="text-3xl font-bold text-gray-900">
+                Reset Password
+              </h2>
               <p className="mt-2 text-gray-600">
-                Enter the email associated with your Todue account
+                Enter new credentials for your Todue account
               </p>
             </div>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <FormInput
-                id="email"
+                id="password"
                 required={true}
-                labelText="Email"
-                placeHolderText="Enter your email"
-                type="email"
-                name="email"
+                labelText="Password"
+                placeHolderText="Enter your new password"
+                type="password"
+                name="password"
                 onChange={(event) => {
-                  setFormData({ ...formData, email: event.target.value });
+                  setFormData({ ...formData, password: event.target.value });
+                }}
+              />
+
+              <FormInput
+                id="password"
+                required={true}
+                labelText="Confirm"
+                placeHolderText="Confirm your new password"
+                type="password"
+                name="confirmPassword"
+                onChange={(event) => {
+                  setFormData({
+                    ...formData,
+                    confirmPassword: event.target.value,
+                  });
                 }}
               />
 
@@ -130,14 +154,13 @@ export default function ForgotPassword() {
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Sending Email...
+                    Resetting Password...
                   </>
                 ) : (
-                  "Submit"
+                  "Reset Password"
                 )}
               </button>
             </form>
-
           </motion.div>
         </div>
       </div>

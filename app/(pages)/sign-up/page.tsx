@@ -102,9 +102,11 @@ export default function SignUp() {
             className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 space-y-8"
           >
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
+              <h2 className="text-3xl font-bold text-gray-900">
+              Create an Account
+              </h2>
               <p className="mt-2 text-gray-600">
-                Sign in to your Todue account
+                Make a Todue account
               </p>
             </div>
 
@@ -137,7 +139,7 @@ export default function SignUp() {
                 id="password"
                 required={true}
                 labelText="Confirm"
-                placeHolderText="Enter your password"
+                placeHolderText="Confirm your password"
                 type="password"
                 name="confirmPassword"
                 onChange={(event) => {
