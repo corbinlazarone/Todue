@@ -1,12 +1,7 @@
 import { Geist } from "next/font/google";
 import "./globals.css";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
-
 export const metadata = {
-  metadataBase: new URL(defaultUrl),
   title: "Todue | Landing",
   description: "The fastest way to build apps with Next.js and Supabase",
 };
