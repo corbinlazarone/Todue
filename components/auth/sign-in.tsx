@@ -4,9 +4,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Image from "next/image";
 import FormInput from "@/components/ui/input";
-import { signInAction } from "@/app/actions";
+import { signInAction, signInWithGoogle } from "@/app/actions";
 import PopupAlert from "@/components/ui/popup-alert";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import AuthHeader from "../ui/auth-pages-header";
 
 interface FormData {
@@ -31,6 +31,23 @@ export default function SignInComp() {
     confirmPassword: "",
     callbackUrl: "",
   });
+
+  const handleGoogleOAuth = async () => {
+    try {
+      const response = await signInWithGoogle();
+
+      setAlert({
+        type: response.type,
+        message: response.message,
+      });
+
+      if (response.type === "error") {
+        router.push("/sign-in");
+      }
+    } catch (error: any) {
+      console.log("Unexpected error: ", error);
+    }
+  };
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
@@ -80,6 +97,9 @@ export default function SignInComp() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors mb-8"
+            onClick={() => {
+              router.push("/");
+            }}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
@@ -128,6 +148,9 @@ export default function SignInComp() {
                 <button
                   type="button"
                   className="text-sm text-indigo-600 hover:text-indigo-500"
+                  onClick={() => {
+                    router.push("/forgot-password");
+                  }}
                 >
                   Forgot password?
                 </button>
@@ -152,9 +175,12 @@ export default function SignInComp() {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
-                <button className="text-indigo-600 hover:text-indigo-500 font-medium" onClick={() => {
-                  redirect("/sign-up")
-                }}>
+                <button
+                  className="text-indigo-600 hover:text-indigo-500 font-medium"
+                  onClick={() => {
+                    router.push("/sign-up");
+                  }}
+                >
                   Sign up now
                 </button>
               </p>
@@ -162,7 +188,10 @@ export default function SignInComp() {
 
             {/* OAuth Buttons */}
             <div className="space-y-4">
-              <button className="w-full flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors">
+              <button
+                className="w-full flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors"
+                onClick={handleGoogleOAuth}
+              >
                 <Image
                   src="/google_icon.svg"
                   alt="Google"

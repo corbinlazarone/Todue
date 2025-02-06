@@ -129,7 +129,7 @@ export const signInAction = async (
   };
 };
 
-export const signInWithGoogle = async () => {
+export const signInWithGoogle = async (): Promise<AuthResponse> => {
   const supabase = await createClient();
   const headersList = await headers();
   const origin = headersList.get("origin") || process.env.NEXT_PUBLIC_BASE_URL;
@@ -149,14 +149,21 @@ export const signInWithGoogle = async () => {
 
   if (error) {
     console.error("OAuth error:", error.message);
-    return redirect("/sign-in?error=OAuth+failed");
+
+    return {
+      type: "error",
+      message: "There was problem loggin in with Google. Please Try again."
+    }
   }
 
   if (data.url) {
     return redirect(data.url);
   }
 
-  return redirect("/sign-in?error=No+URL+returned");
+  return {
+    type: "error",
+    message: "No Url was returned from Google. Please Try again."
+  }
 };
 
 export const forgotPasswordAction = async (formData: FormData): Promise<AuthResponse> => {

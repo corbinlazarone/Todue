@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import PopupAlert from "@/components/ui/popup-alert";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
@@ -8,6 +7,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import FormInput from "@/components/ui/input";
 import { forgotPasswordAction } from "@/app/actions";
 import AuthHeader from "../ui/auth-pages-header";
+import { useRouter } from "next/navigation";
 
 interface FormData {
   email: string;
@@ -22,6 +22,7 @@ interface Alert {
 }
 
 export default function ForgotPasswordComp() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<Alert | null>(null);
   const [formData, setFormData] = useState<FormData>({
@@ -76,6 +77,7 @@ export default function ForgotPasswordComp() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors mb-8"
+            onClick={() => { router.push("/") }}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home

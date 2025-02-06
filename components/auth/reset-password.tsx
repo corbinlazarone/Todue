@@ -83,6 +83,7 @@ export default function ResetPasswordComp() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors mb-8"
+            onClick={() => { router.push("/") }}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
