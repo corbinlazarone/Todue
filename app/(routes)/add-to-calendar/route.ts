@@ -145,23 +145,21 @@ export async function POST(request: NextRequest) {
           },
         };
 
-        const response = await calendar.events.insert({
-          calendarId: "primary",
-          requestBody: event,
-        });
+        // const response = await calendar.events.insert({
+        //   calendarId: "primary",
+        //   requestBody: event,
+        // });
 
-        if (!response.data.id) {
-          return NextResponse.json(
-            { error: "Unexpected Google Calendar error. Please Try again." },
-            { status: 500 }
-          );
-        }
+        // if (!response.data.id) {
+        //   return NextResponse.json(
+        //     { error: "Unexpected Google Calendar error. Please Try again." },
+        //     { status: 500 }
+        //   );
+        // }
 
-        return response.data.id;
+        // return response.data.id;
       })
     );
-
-    console.log(results);
 
     return NextResponse.json({ message: "Success" });
   } catch (error: any) {

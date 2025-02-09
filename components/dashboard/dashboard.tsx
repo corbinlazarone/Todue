@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { PulsatingButton } from "../ui/pulsating-button";
 import { User } from "@supabase/supabase-js";
 import DashboardHeader from "./dash-header";
+import FileUpload from "./file-upload";
 
 const assignments = [
   {
@@ -59,9 +59,7 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
     <div>
       <DashboardHeader user={user} signOut={signOut} />
       <div className="mt-20 flex justify-center">
-        <PulsatingButton onClick={handleClick}>
-          Test Calendar Endpoint
-        </PulsatingButton>
+        <FileUpload />
       </div>
     </div>
   );
