@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { Session, User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
 
 interface StripeCustomer {
   has_access: boolean;
@@ -62,10 +62,10 @@ export const checkUserSubscription = async (
 export const fetchUserSession = async (): Promise<SessionResponse> => {
   const supabase = await createClient();
 
-  const { data: { session }, error: SessionError } =
+  const { data: { session }, error: sessionError } =
     await supabase.auth.getSession();
 
-  if (SessionError) {
+  if (sessionError) {
     return { error: "Error fetching user session" };
   }
 

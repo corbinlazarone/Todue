@@ -3,7 +3,6 @@ import {
   checkUserSubscription,
   fetchUserSession,
 } from "@/app/helpers";
-import { createClient } from "@/utils/supabase/server";
 import { toZonedTime } from "date-fns-tz";
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
@@ -20,7 +19,6 @@ interface assignment {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
   const body = await request.json();
 
   /**
@@ -77,8 +75,15 @@ export async function POST(request: NextRequest) {
 
   const assignments: assignment[] = body.assignments;
   const providerToken: string | null | undefined =
-   fetchSession.success.provider_token;
+    fetchSession.success.provider_token;
   const userTimeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  if (!providerToken) {
+    return NextResponse.redirect(
+      new URL("/sign-in?reauth=true", request.url),
+      303
+    );
+  }
 
   /**
    * Add to calendar logic here
@@ -156,9 +161,11 @@ export async function POST(request: NextRequest) {
       })
     );
 
+    console.log(results);
+
     return NextResponse.json({ message: "Success" });
   } catch (error: any) {
-    console.error(error);
+    console.log(error);
     return NextResponse.json(
       {
         error: `Unexpected Error adding assignments to calendar. Please Try again.`,
@@ -187,7 +194,6 @@ function googleCalendarIdConverter(hexColor: string): string {
 }
 
 function formatDateTime(date: string, time: string, timezone: string): string {
-
   // Create date string
   const dateTimeStr = `${date}T${time}`;
 

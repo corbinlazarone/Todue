@@ -1,5 +1,7 @@
 import SignInComp from "@/components/auth/sign-in";
+import LoadingPage from "@/components/ui/loading-page";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Todue | Sign In",
@@ -7,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function SignInPage() {
-  return <SignInComp />
+  return (
+    <Suspense fallback={<LoadingPage />}>
+      <SignInComp />
+    </Suspense>
+  )
 }

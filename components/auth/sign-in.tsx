@@ -1,12 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Image from "next/image";
 import FormInput from "@/components/ui/input";
 import { signInAction, signInWithGoogle } from "@/app/actions";
 import PopupAlert from "@/components/ui/popup-alert";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthHeader from "../ui/auth-pages-header";
 
 interface FormData {
@@ -23,6 +23,7 @@ interface Alert {
 
 export default function SignInComp() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [alert, setAlert] = useState<Alert | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -31,6 +32,17 @@ export default function SignInComp() {
     confirmPassword: "",
     callbackUrl: "",
   });
+
+  // check for reauth parameter.
+  useEffect(() => {
+    const needsReauth = searchParams.get("reauth");
+    if (needsReauth === "true") {
+      setAlert({
+        type: "info",
+        message: "Please sign in again with Google to continue",
+      });
+    };
+  }, [searchParams]);
 
   const handleGoogleOAuth = async () => {
     try {
@@ -84,6 +96,7 @@ export default function SignInComp() {
           <PopupAlert
             message={alert.message}
             type={alert.type}
+            duration={5000}
             onClose={() => setAlert(null)}
           />
         )}

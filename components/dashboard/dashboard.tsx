@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { PulsatingButton } from "../ui/pulsating-button";
 
 const assignments = [
@@ -16,6 +17,8 @@ const assignments = [
 ];
 
 export default function DashboardComp() {
+  const router = useRouter();
+
   const handleClick = async () => {
     try {
       const response = await fetch("/add-to-calendar", {
@@ -26,18 +29,25 @@ export default function DashboardComp() {
         body: JSON.stringify({ assignments: assignments }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("Content-Type");
 
-      if (data.error) {
-        throw new Error(data.error);
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        console.log(data);
+      } else {
+        // Handling non-JSON redirect becuase of undefiend provider token
+        router.push("/sign-in?reauth=true");
       }
-
-      console.log(data);
     } catch (error: any) {
-      console.error(error.message);
+      console.error(error);
     }
   };
-
+  
   return (
     <div>
       <PulsatingButton onClick={handleClick}>
