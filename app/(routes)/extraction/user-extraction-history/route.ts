@@ -1,16 +1,42 @@
-import { createClient } from "@/utils/supabase/server";
+import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
 import { NextResponse } from "next/server";
 
+// Fetching user extraction history
+
 export async function GET() {
-    const supabase = await createClient();
+  /**
+   * Checking if user is authenticated
+   */
+  const userAuthenticated = await checkAuthenticatedUser();
+  if (userAuthenticated.error) {
+    return NextResponse.json(
+      { error: userAuthenticated.error },
+      { status: 401 }
+    );
+  }
 
-    const { data: { user }} = await supabase.auth.getUser();
+  /**
+   * Checking if user has paid access to this feature
+   */
+  const userSubscription = await checkUserSubscription(
+    userAuthenticated.success?.email
+  );
 
-    if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (userSubscription.error === "Access denied --- Subscription required") {
+    return NextResponse.json(
+      { error: userSubscription.error },
+      { status: 403 }
+    );
+  }
 
-    /**
-     * Fetching User Extraction History Logic Here
-     */
+  if (userSubscription.error === "Error fetching user subscription status") {
+    return NextResponse.json(
+      { error: userSubscription.error },
+      { status: 500 }
+    );
+  }
+
+  /**
+   * Supabase db query to fetch user extraction history
+   */
 }

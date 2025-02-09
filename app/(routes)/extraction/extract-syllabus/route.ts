@@ -133,9 +133,14 @@ const processDocumentWithClaude = async (text: string): Promise<CourseData> => {
   }
 };
 
+// TODO: Implement save extracted data to supabase db
+
 export async function POST(request: NextRequest) {
   try {
 
+    /**
+     * Chceking if user is authenticated
+     */
     const userAuthenticated = await checkAuthenticatedUser();
     if (userAuthenticated.error) {
       return NextResponse.json(
@@ -144,6 +149,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    /**
+     * Checking if user has paid access to this feature
+     */
     const userSubscription = await checkUserSubscription(
       userAuthenticated.success?.email
     );

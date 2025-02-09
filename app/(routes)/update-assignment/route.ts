@@ -1,21 +1,40 @@
-
-/**
- * POST --- will require an assignment object in the body
- */
-
-import { createClient } from "@/utils/supabase/server";
+import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
 import { NextResponse } from "next/server";
 
 export async function POST() {
-    const supabase = await createClient();
+  /**
+   * Checking if user is authenticated
+   */
+  const userAuthenticated = await checkAuthenticatedUser();
+  if (userAuthenticated.error) {
+    return NextResponse.json(
+      { error: userAuthenticated.error },
+      { status: 401 }
+    );
+  }
 
-    const { data: { user }} = await supabase.auth.getUser();
+  /**
+   * Checking if user had paid access to this feature
+   */
+  const userSubscription = await checkUserSubscription(
+    userAuthenticated.success?.email
+  );
 
-    if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (userSubscription.error === "Access denied --- Subscription required") {
+    return NextResponse.json(
+      { error: userSubscription.error },
+      { status: 403 }
+    );
+  }
 
-    /** 
-     * Update Assignment Logic Here
-     */
+  if (userSubscription.error === "Error fetching user subscription status") {
+    return NextResponse.json(
+      { error: userSubscription.error },
+      { status: 500 }
+    );
+  }
+
+  /**
+   * Supabase db query to update assignment
+   */
 }
