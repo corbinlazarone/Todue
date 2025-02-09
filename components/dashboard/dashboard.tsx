@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { PulsatingButton } from "../ui/pulsating-button";
+import { User } from "@supabase/supabase-js";
+import DashboardHeader from "./dash-header";
 
 const assignments = [
   {
@@ -16,7 +18,12 @@ const assignments = [
   },
 ];
 
-export default function DashboardComp() {
+interface DashboardCompProps {
+  user: User;
+  signOut: () => void;
+}
+
+export default function DashboardComp({ user, signOut }: DashboardCompProps) {
   const router = useRouter();
 
   const handleClick = async () => {
@@ -47,12 +54,15 @@ export default function DashboardComp() {
       console.error(error);
     }
   };
-  
+
   return (
     <div>
-      <PulsatingButton onClick={handleClick}>
-        Test Calendar Endpoint
-      </PulsatingButton>
+      <DashboardHeader user={user} signOut={signOut} />
+      <div className="mt-20 flex justify-center">
+        <PulsatingButton onClick={handleClick}>
+          Test Calendar Endpoint
+        </PulsatingButton>
+      </div>
     </div>
   );
 }

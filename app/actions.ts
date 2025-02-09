@@ -260,5 +260,5 @@ export const resetPasswordAction = async (formData: FormData): Promise<AuthRespo
 export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return redirect("/sign-in");
+  return redirect("/");
 };
