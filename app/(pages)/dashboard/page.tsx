@@ -10,7 +10,6 @@ export default async function DashboadPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-
   if (!user) {
     return redirect("/sign-in");
   }

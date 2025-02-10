@@ -15,6 +15,11 @@ import {
 } from "lucide-react";
 import PopupAlert from "@/components/ui/popup-alert";
 
+interface Alert {
+  type?: "info" | "success" | "warning" | "error";
+  message: string;
+}
+
 interface Assignment {
   id: number;
   name: string;
@@ -261,25 +266,52 @@ function AssignmentForm({
 export default function DocumentUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [alert, setAlert] = useState<Alert | null>(null);
   const [assignments, setAssignments] = useState(DEMO_DATA.assignments);
   const [courseName, setCourseName] = useState(DEMO_DATA.course_name);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [uploadingToCalendar, setUploadingToCalendar] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleExtraction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
 
     setLoading(true);
-    setError(null);
 
-    // TODO: Implement API call to extract assignments from the uploaded file
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/extraction/extract-syllabus", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (data.message) {
+        setAlert({
+          type: "success",
+          message: "Assignments Extracted Successfully!",
+        });
+      }
+
+      setCourseName(data.data.course_name);
+      setAssignments(data.data.assignments);
+    } catch (error: any) {
+      console.error(error);
+      setAlert({
+        type: "error",
+        message: error.message || "Failed to extract data from document",
+      });
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   const handleEdit = (assignment: Assignment) => {
@@ -308,7 +340,7 @@ export default function DocumentUpload() {
     // Simulate API call
     setTimeout(() => {
       setUploadingToCalendar(false);
-      setShowSuccessPopup(true);
+      // setShowSuccessPopup(true);
     }, 2000);
   };
 
@@ -346,11 +378,12 @@ export default function DocumentUpload() {
 
   return (
     <div className="h-full w-full overflow-y-auto px-6 py-6">
-      {showSuccessPopup && (
+      {alert && (
         <PopupAlert
-          message="Successfully added assignments to Google Calendar!"
-          type="success"
-          onClose={() => setShowSuccessPopup(false)}
+          message={alert.message}
+          type={alert.type}
+          duration={5000}
+          onClose={() => setAlert(null)}
         />
       )}
 
@@ -375,7 +408,7 @@ export default function DocumentUpload() {
           ) : (
             <>
               <Calendar className="w-4 h-4 mr-2" />
-              Sync Calendar
+              Add to Google Calendar
             </>
           )}
         </button>
@@ -413,7 +446,7 @@ export default function DocumentUpload() {
               </div>
             )}
             <button
-              onClick={handleSubmit}
+              onClick={handleExtraction}
               disabled={!file || loading}
               className="mt-4 w-full flex items-center justify-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -466,75 +499,94 @@ export default function DocumentUpload() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {assignments.map((assignment) => (
-          <motion.div
-            key={assignment.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow"
+      {assignments.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+          <FileText className="h-12 w-12 text-gray-400 mb-3" />
+          <h3 className="text-lg font-medium text-gray-900 mb-1">
+            No Assignments Yet
+          </h3>
+          <p className="text-sm text-gray-500 text-center mb-4">
+            Upload a syllabus or add assignments manually to get started
+          </p>
+          <button
+            onClick={() => setShowNewForm(true)}
+            className="flex items-center px-4 py-2 text-sm text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
           >
-            {editingId === assignment.id ? (
-              <AssignmentForm
-                assignment={assignment}
-                onSave={(data) => handleSave(assignment.id, data)}
-                onCancel={() => setEditingId(null)}
-              />
-            ) : (
-              <>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <div
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: assignment.color }}
-                    />
-                    <h3 className="font-medium text-gray-900">
-                      {assignment.name}
-                    </h3>
+            <Plus className="h-4 w-4 mr-1" />
+            Add First Assignment
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {assignments.map((assignment) => (
+            <motion.div
+              key={assignment.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow"
+            >
+              {editingId === assignment.id ? (
+                <AssignmentForm
+                  assignment={assignment}
+                  onSave={(data) => handleSave(assignment.id, data)}
+                  onCancel={() => setEditingId(null)}
+                />
+              ) : (
+                <>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <div
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: assignment.color }}
+                      />
+                      <h3 className="font-medium text-gray-900">
+                        {assignment.name}
+                      </h3>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => handleEdit(assignment)}
+                        className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(assignment.id)}
+                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <button
-                      onClick={() => handleEdit(assignment)}
-                      className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(assignment.id)}
-                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
 
-                {assignment.description && (
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {assignment.description}
-                  </p>
-                )}
+                  {assignment.description && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {assignment.description}
+                    </p>
+                  )}
 
-                <div className="space-y-1.5 text-sm">
-                  <div className="flex items-center text-gray-700">
-                    <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                    {formatDate(assignment.due_date)}
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex items-center text-gray-700">
+                      <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                      {formatDate(assignment.due_date)}
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <Clock className="w-3.5 h-3.5 mr-1.5" />
+                      {formatTime(assignment.start_time)} -{" "}
+                      {formatTime(assignment.end_time)}
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <AlertCircle className="w-3.5 h-3.5 mr-1.5" />
+                      {formatReminder(assignment.reminder)}
+                    </div>
                   </div>
-                  <div className="flex items-center text-gray-700">
-                    <Clock className="w-3.5 h-3.5 mr-1.5" />
-                    {formatTime(assignment.start_time)} -{" "}
-                    {formatTime(assignment.end_time)}
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <AlertCircle className="w-3.5 h-3.5 mr-1.5" />
-                    {formatReminder(assignment.reminder)}
-                  </div>
-                </div>
-              </>
-            )}
-          </motion.div>
-        ))}
-      </div>
+                </>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Add New Assignment Modal */}
       <AnimatePresence>

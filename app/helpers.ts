@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { User } from "@supabase/supabase-js";
+import { SupabaseClient, User } from "@supabase/supabase-js";
 import PDFParser from 'pdf2json';
 
 import type { Buffer } from 'buffer';
@@ -13,6 +13,7 @@ interface StripeCustomer {
 interface AuthenticatedResponse {
   error?: string;
   success?: User;
+  supabaseClient?: SupabaseClient;
 }
 
 interface SubscriptionResponse {
@@ -36,7 +37,7 @@ export const checkAuthenticatedUser = async (): Promise<AuthenticatedResponse> =
     return { error: "Unauthorized" };
   }
 
-  return { success: user };
+  return { success: user, supabaseClient: supabase };
 };
 
 export const checkUserSubscription = async (
@@ -73,8 +74,6 @@ export const fetchUserSession = async (): Promise<SessionResponse> => {
   if (sessionError) {
     return { error: "Error fetching user session" };
   }
-
-  console.log(session?.access_token);
 
   return { success: session };
 };

@@ -6,6 +6,8 @@ import {
 } from "@/app/helpers";
 import { NextRequest, NextResponse } from "next/server";
 import { Anthropic } from "@anthropic-ai/sdk";
+import { SupabaseClient, User } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/server";
 
 interface FileData {
   buffer: Buffer;
@@ -133,11 +135,73 @@ const processDocumentWithClaude = async (text: string): Promise<CourseData> => {
   }
 };
 
-// TODO: Implement save extracted data to supabase db
+const saveCourseDataToSupabase = async (
+  courseData: CourseData,
+  signedInUser: User,
+  supabase: SupabaseClient
+): Promise<boolean> => {
+  try {
+    // Generate a more reliable unique ID (consider using UUID instead)
+    const userEmail = signedInUser.email;
+    const userId = signedInUser.id;
+
+    const { course_name, assignments } = courseData;
+
+    // Save course data to Supabase DB
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .insert([
+        {
+          user_id: userId,
+          user_email: userEmail,
+          course_name: course_name,
+          created_at: new Date().toISOString(),
+        }
+      ])
+      .select()
+      .single();
+    
+    if (courseError) {
+      console.error("Error inserting course data:", courseError);
+      throw new Error("Failed to save course data");
+    }
+
+    if (!course) {
+      throw new Error("Course was not created");
+    }
+
+    // Save Assignment data to Supabase DB with course id
+    const { error: assignmentError } = await supabase
+      .from("assignments")
+      .insert(
+        assignments.map((assignment) => ({
+          id: Math.floor(Math.random() * 1000000) + 1,
+          course_id: course.id,
+          name: assignment.name,
+          description: assignment.description,
+          due_date: assignment.due_date,
+          color: assignment.color,
+          start_time: assignment.start_time,
+          end_time: assignment.end_time,
+          reminder: assignment.reminder,
+          created_at: new Date().toISOString(),
+        }))
+      );
+
+    if (assignmentError) {
+      console.error("Error inserting assignment data:", assignmentError);
+      throw new Error("Failed to save assignment data");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in saveCourseDataToSupabase:", error);
+    throw error;
+  }
+};
 
 export async function POST(request: NextRequest) {
   try {
-
     /**
      * Chceking if user is authenticated
      */
@@ -172,7 +236,7 @@ export async function POST(request: NextRequest) {
 
     // Handle multipart form data
     const formData = await request.formData();
-    const file = formData.get('file');
+    const file = formData.get("file");
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
@@ -185,7 +249,7 @@ export async function POST(request: NextRequest) {
     const fileData: FileData = {
       buffer,
       originalname: file.name,
-      mimetype: file.type
+      mimetype: file.type,
     };
 
     const allowedTypes: AllowedMimeTypes[] = [
@@ -219,6 +283,24 @@ export async function POST(request: NextRequest) {
 
     const courseData = await processDocumentWithClaude(extractedText);
 
+    /**
+     * Insert Course Data to Supabase DB
+     */
+    const { supabaseClient } = userAuthenticated;
+
+    if (!supabaseClient) {
+      return NextResponse.json(
+        { error: "Supabase not intialized" },
+        { status: 500 }
+      );
+    }
+
+    await saveCourseDataToSupabase(
+      courseData,
+      userAuthenticated.success as User,
+      supabaseClient      
+    );
+
     return NextResponse.json({
       message: "Syllabus processed successfully",
       data: courseData,
@@ -226,7 +308,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Error processing document:", error);
     return NextResponse.json(
-      { error: error.message || "An unexpected error occurred" },
+      { error: "An unexpected error occurred. Try again later." },
       { status: 500 }
     );
   }

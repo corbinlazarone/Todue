@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import DashboardHeader from "./dash-header";
-import FileUpload from "./file-upload";
+import DocumentUpload from "./file-upload";
 
 const assignments = [
   {
@@ -26,7 +26,7 @@ interface DashboardCompProps {
 export default function DashboardComp({ user, signOut }: DashboardCompProps) {
   const router = useRouter();
 
-  const handleClick = async () => {
+  const handleAddToGoogleCalendar = async () => {
     try {
       const response = await fetch("/add-to-calendar", {
         method: "POST",
@@ -59,7 +59,7 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
     <div>
       <DashboardHeader user={user} signOut={signOut} />
       <div className="mt-20 flex justify-center">
-        <FileUpload />
+        <DocumentUpload />
       </div>
     </div>
   );
