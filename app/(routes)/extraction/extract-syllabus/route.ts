@@ -193,7 +193,7 @@ const saveCourseDataToSupabase = async (
     }
 
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in saveCourseDataToSupabase:", error);
     throw error;
   }
@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
     await saveCourseDataToSupabase(
       courseData,
       userAuthenticated.success as User,
-      supabaseClient      
+      supabaseClient
     );
 
     return NextResponse.json({
