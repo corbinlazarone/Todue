@@ -89,7 +89,7 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
                 : "text-gray-600 hover:bg-gray-50"
             }`}
           >
-            Upload Syllabi
+            Dashboard
           </button>
           <button
             onClick={() => {

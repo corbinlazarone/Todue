@@ -8,11 +8,15 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.3",
     "@googleapis/calendar": "^9.7.9",
+    "@radix-ui/react-popover": "^1.1.6",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-slot": "^1.1.2",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "autoprefixer": "10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "framer-motion": "^12.0.6",
     "googleapis": "^144.0.0",
@@ -24,6 +28,7 @@
     "pdf2json": "^3.1.5",
     "prettier": "^3.3.3",
     "react": "19.0.0",
+    "react-day-picker": "^8.10.1",
     "react-dom": "19.0.0",
     "stripe": "^17.6.0"
   },

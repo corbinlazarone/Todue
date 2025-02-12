@@ -141,7 +141,6 @@ const saveCourseDataToSupabase = async (
   supabase: SupabaseClient
 ): Promise<boolean> => {
   try {
-    // Generate a more reliable unique ID (consider using UUID instead)
     const userEmail = signedInUser.email;
     const userId = signedInUser.id;
 

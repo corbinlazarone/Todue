@@ -13,8 +13,15 @@ import {
   Upload,
   AlertCircle,
   X,
+  CalendarIcon,
 } from "lucide-react";
 import PopupAlert from "@/components/ui/popup-alert";
+import { Select, SelectContent, SelectItem, SelectValue } from "../ui/select";
+import { SelectTrigger } from "@radix-ui/react-select";
+import { Popover, PopoverContent } from "../ui/popover";
+import { PopoverTrigger } from "@radix-ui/react-popover";
+import { Button } from "../ui/button";
+import { CalendarTrigger } from "../ui/calendar";
 
 interface Alert {
   type?: "info" | "success" | "warning" | "error";
@@ -63,11 +70,10 @@ const COLORS = [
 ];
 
 const REMINDER_OPTIONS = [
-  { value: 10, label: "10 minutes" },
-  { value: 60, label: "1 hour" },
-  { value: 1440, label: "1 day" },
-  { value: 2880, label: "2 days" },
-  { value: 10080, label: "1 week" },
+  { value: 0, label: 'No reminder' },
+  { value: 15, label: '15 minutes before' },
+  { value: 30, label: '30 minutes before' },
+  { value: 60, label: '1 hour before' },
 ];
 
 const DEMO_DATA: CourseData = {
@@ -105,7 +111,7 @@ function AssignmentForm({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Assignment Name
@@ -135,17 +141,13 @@ function AssignmentForm({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">
             Due Date
           </label>
-          <input
-            type="date"
+          <CalendarTrigger
             value={formData.due_date}
-            onChange={(e) =>
-              setFormData({ ...formData, due_date: e.target.value })
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            onChange={(date) => setFormData({ ...formData, due_date: date })}
           />
         </div>
 
@@ -153,19 +155,27 @@ function AssignmentForm({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Color
           </label>
-          <select
+          <Select
             value={formData.color}
-            onChange={(e) =>
-              setFormData({ ...formData, color: e.target.value })
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            onValueChange={(value) => setFormData({ ...formData, color: value })}
           >
-            {COLORS.map((color) => (
-              <option key={color.value} value={color.value}>
-                {color.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              <SelectValue placeholder="Select a color" />
+            </SelectTrigger>
+            <SelectContent>
+              {COLORS.map((color) => (
+                <SelectItem key={color.value} value={color.value}>
+                  <div className="flex items-center">
+                    <div 
+                      className="w-3 h-3 rounded-full mr-2"
+                      style={{ backgroundColor: color.value }}
+                    />
+                    {color.label}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -174,28 +184,34 @@ function AssignmentForm({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Start Time
           </label>
-          <input
-            type="time"
-            value={formData.start_time}
-            onChange={(e) =>
-              setFormData({ ...formData, start_time: e.target.value })
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          />
+          <div className="relative">
+            <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <input
+              type="time"
+              value={formData.start_time}
+              onChange={(e) =>
+                setFormData({ ...formData, start_time: e.target.value })
+              }
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             End Time
           </label>
-          <input
-            type="time"
-            value={formData.end_time}
-            onChange={(e) =>
-              setFormData({ ...formData, end_time: e.target.value })
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          />
+          <div className="relative">
+            <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <input
+              type="time"
+              value={formData.end_time}
+              onChange={(e) =>
+                setFormData({ ...formData, end_time: e.target.value })
+              }
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
         </div>
       </div>
 
@@ -203,19 +219,21 @@ function AssignmentForm({
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Reminder
         </label>
-        <select
-          value={formData.reminder}
-          onChange={(e) =>
-            setFormData({ ...formData, reminder: Number(e.target.value) })
-          }
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        <Select
+          value={formData.reminder.toString()}
+          onValueChange={(value) => setFormData({ ...formData, reminder: Number(value) })}
         >
-          {REMINDER_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <SelectValue placeholder="Select a reminder" />
+          </SelectTrigger>
+          <SelectContent>
+            {REMINDER_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value.toString()}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
@@ -228,7 +246,7 @@ function AssignmentForm({
         </button>
         <button
           type="button"
-          onClick={() => onSave(formData)}
+          onClick={onSave}
           className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-md hover:from-indigo-700 hover:to-purple-700"
         >
           {isNew ? "Add Assignment" : "Save Changes"}
