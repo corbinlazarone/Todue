@@ -13,13 +13,10 @@ import {
   Upload,
   AlertCircle,
   X,
-  CalendarIcon,
 } from "lucide-react";
 import PopupAlert from "@/components/ui/popup-alert";
 import { Select, SelectContent, SelectItem, SelectValue } from "../ui/select";
 import { SelectTrigger } from "@radix-ui/react-select";
-import { Popover, PopoverContent } from "../ui/popover";
-import { PopoverTrigger } from "@radix-ui/react-popover";
 import { Button } from "../ui/button";
 import { CalendarTrigger } from "../ui/calendar";
 
@@ -70,29 +67,11 @@ const COLORS = [
 ];
 
 const REMINDER_OPTIONS = [
-  { value: 0, label: 'No reminder' },
-  { value: 15, label: '15 minutes before' },
-  { value: 30, label: '30 minutes before' },
-  { value: 60, label: '1 hour before' },
+  { value: 0, label: "No reminder" },
+  { value: 15, label: "15 minutes before" },
+  { value: 30, label: "30 minutes before" },
+  { value: 60, label: "1 hour before" },
 ];
-
-const DEMO_DATA: CourseData = {
-  course_name: "CS 101: Introduction to Computer Science",
-  assignments: [
-    {
-      id: 1,
-      name: "Midterm Exam",
-      description:
-        "Covers chapters 1-5: Programming fundamentals, data structures, and algorithms",
-      due_date: "2024-03-15",
-      color: "#7986cb",
-      start_time: "14:30",
-      end_time: "16:30",
-      reminder: 1440,
-    },
-    // ... other demo assignments
-  ],
-};
 
 function AssignmentForm({
   assignment,
@@ -142,9 +121,7 @@ function AssignmentForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            Due Date
-          </label>
+          <label className="text-sm font-medium text-gray-700">Due Date</label>
           <CalendarTrigger
             value={formData.due_date}
             onChange={(date) => setFormData({ ...formData, due_date: date })}
@@ -157,7 +134,9 @@ function AssignmentForm({
           </label>
           <Select
             value={formData.color}
-            onValueChange={(value) => setFormData({ ...formData, color: value })}
+            onValueChange={(value) =>
+              setFormData({ ...formData, color: value })
+            }
           >
             <SelectTrigger className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500">
               <SelectValue placeholder="Select a color" />
@@ -166,7 +145,7 @@ function AssignmentForm({
               {COLORS.map((color) => (
                 <SelectItem key={color.value} value={color.value}>
                   <div className="flex items-center">
-                    <div 
+                    <div
                       className="w-3 h-3 rounded-full mr-2"
                       style={{ backgroundColor: color.value }}
                     />
@@ -221,7 +200,9 @@ function AssignmentForm({
         </label>
         <Select
           value={formData.reminder.toString()}
-          onValueChange={(value) => setFormData({ ...formData, reminder: Number(value) })}
+          onValueChange={(value) =>
+            setFormData({ ...formData, reminder: Number(value) })
+          }
         >
           <SelectTrigger className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500">
             <SelectValue placeholder="Select a reminder" />
@@ -246,7 +227,7 @@ function AssignmentForm({
         </button>
         <button
           type="button"
-          onClick={onSave}
+          onClick={() => onSave(formData)}
           className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-md hover:from-indigo-700 hover:to-purple-700"
         >
           {isNew ? "Add Assignment" : "Save Changes"}
@@ -262,8 +243,8 @@ export default function DocumentUpload({
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<Alert | null>(null);
-  const [assignments, setAssignments] = useState(DEMO_DATA.assignments);
-  const [courseName, setCourseName] = useState(DEMO_DATA.course_name);
+  const [assignments, setAssignments] = useState<Assignment[] | null>(null);
+  const [courseName, setCourseName] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [uploadingToCalendar, setUploadingToCalendar] = useState(false);
@@ -314,6 +295,8 @@ export default function DocumentUpload({
   };
 
   const handleSave = (id: number, updatedData: Partial<Assignment>) => {
+    if (!assignments) return;
+
     setAssignments(
       assignments.map((a) => (a.id === id ? { ...a, ...updatedData } : a))
     );
@@ -321,12 +304,23 @@ export default function DocumentUpload({
   };
 
   const handleDelete = (id: number) => {
+    if (!assignments) return;
+
     setAssignments(assignments.filter((a) => a.id !== id));
   };
 
   const handleAddNew = (newAssignment: Omit<Assignment, "id">) => {
-    const newId = Math.max(...assignments.map((a) => a.id)) + 1;
-    setAssignments([...assignments, { ...newAssignment, id: newId }]);
+
+    /**
+     * This will call a API endpoint to insert a assignment manually
+     */
+
+    if (!assignments) {
+      setAssignments([{ ...newAssignment, id: 1 }]);
+    } else {
+      const newId = Math.max(...assignments.map((a) => a.id)) + 1;
+      setAssignments([...assignments, { ...newAssignment, id: newId }]);
+    }
     setShowNewForm(false);
   };
 
@@ -409,7 +403,9 @@ export default function DocumentUpload({
           </div>
           <button
             onClick={handleUploadToCalendar}
-            disabled={uploadingToCalendar}
+            disabled={
+              !assignments || assignments.length === 0 || uploadingToCalendar
+            }
             className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploadingToCalendar ? (
@@ -477,22 +473,23 @@ export default function DocumentUpload({
           {/* Quick Stats */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {courseName}
+              {courseName || "Course Name"}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm text-gray-500">Total Assignments</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {assignments.length}
+                  {assignments?.length || 0}
                 </p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm text-gray-500">Upcoming Due</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {
-                    assignments.filter((a) => new Date(a.due_date) > new Date())
-                      .length
-                  }
+                  {assignments
+                    ? assignments.filter(
+                        (a) => new Date(a.due_date) > new Date()
+                      ).length
+                    : 0}
                 </p>
               </div>
             </div>
@@ -511,7 +508,24 @@ export default function DocumentUpload({
           </button>
         </div>
 
-        {assignments.length === 0 ? (
+        {!assignments ? (
+          <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+            <FileText className="h-12 w-12 text-gray-400 mb-3" />
+            <h3 className="text-lg font-medium text-gray-900 mb-1">
+              No Assignments Loaded
+            </h3>
+            <p className="text-sm text-gray-500 text-center mb-4">
+              Upload a syllabus to extract assignments or add them manually
+            </p>
+            <button
+              onClick={() => setShowNewForm(true)}
+              className="flex items-center px-4 py-2 text-sm text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add First Assignment
+            </button>
+          </div>
+        ) : assignments.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
             <FileText className="h-12 w-12 text-gray-400 mb-3" />
             <h3 className="text-lg font-medium text-gray-900 mb-1">
