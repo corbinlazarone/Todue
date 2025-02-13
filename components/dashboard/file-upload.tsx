@@ -482,16 +482,6 @@ export default function DocumentUpload({
                   {assignments?.length || 0}
                 </p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-sm text-gray-500">Upcoming Due</p>
-                <p className="text-2xl font-semibold text-gray-900">
-                  {assignments
-                    ? assignments.filter(
-                        (a) => new Date(a.due_date) > new Date()
-                      ).length
-                    : 0}
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -501,7 +491,12 @@ export default function DocumentUpload({
           <h2 className="text-lg font-semibold text-gray-900">Assignments</h2>
           <button
             onClick={() => setShowNewForm(true)}
-            className="w-full sm:w-auto flex items-center justify-center px-3 py-1.5 text-sm text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+            disabled={!courseName}
+            className={`w-full sm:w-auto flex items-center justify-center px-3 py-1.5 text-sm border rounded-lg transition-colors ${
+              courseName 
+                ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50" 
+                : "text-gray-400 border-gray-200 cursor-not-allowed"
+            }`}
           >
             <Plus className="h-4 w-4 mr-1" />
             Add New
@@ -515,11 +510,16 @@ export default function DocumentUpload({
               No Assignments Loaded
             </h3>
             <p className="text-sm text-gray-500 text-center mb-4">
-              Upload a syllabus to extract assignments or add them manually
+              Upload a syllabus to extract assignments
             </p>
             <button
               onClick={() => setShowNewForm(true)}
-              className="flex items-center px-4 py-2 text-sm text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+              disabled={!courseName}
+              className={`flex items-center px-4 py-2 text-sm border rounded-lg transition-colors ${
+                courseName
+                  ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                  : "text-gray-400 border-gray-200 cursor-not-allowed"
+              }`}
             >
               <Plus className="h-4 w-4 mr-1" />
               Add First Assignment
@@ -532,11 +532,16 @@ export default function DocumentUpload({
               No Assignments Yet
             </h3>
             <p className="text-sm text-gray-500 text-center mb-4">
-              Upload a syllabus or add assignments manually to get started
+              Upload a syllabus
             </p>
             <button
               onClick={() => setShowNewForm(true)}
-              className="flex items-center px-4 py-2 text-sm text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+              disabled={!courseName}
+              className={`flex items-center px-4 py-2 text-sm border rounded-lg transition-colors ${
+                courseName
+                  ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                  : "text-gray-400 border-gray-200 cursor-not-allowed"
+              }`}
             >
               <Plus className="h-4 w-4 mr-1" />
               Add First Assignment
