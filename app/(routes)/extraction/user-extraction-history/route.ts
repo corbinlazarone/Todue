@@ -1,9 +1,10 @@
 import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
+import { createClient } from "@/utils/supabase/server";
 import { SupabaseClient, User } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const getCourseDataHistory = async (
-  signedInUser: User | null,
+  signedInUser: User,
   supabase: SupabaseClient
 ) => {
   try {
@@ -12,7 +13,7 @@ const getCourseDataHistory = async (
     const { data: courseHistory, error: courseHistoryError } = await supabase
       .from("courses")
       .select(
-        `id, course_name, created_at, assignments (name, description, due_date, color, start_time, end_time, reminder)`
+        `id, course_name, created_at, assignments (id, name, description, due_date, color, start_time, end_time, reminder)`
       )
       .eq("user_id", userid)
       .order("created_at", { ascending: false });
@@ -32,8 +33,9 @@ const getCourseDataHistory = async (
   }
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+
     /**
      * Checking if user is authenticated
      */

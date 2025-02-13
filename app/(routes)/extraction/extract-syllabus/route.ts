@@ -139,7 +139,7 @@ const saveCourseDataToSupabase = async (
   courseData: CourseData,
   signedInUser: User,
   supabase: SupabaseClient
-): Promise<boolean> => {
+): Promise<CourseData> => {
   try {
     const userEmail = signedInUser.email;
     const userId = signedInUser.id;
@@ -170,7 +170,7 @@ const saveCourseDataToSupabase = async (
     }
 
     // Save Assignment data to Supabase DB with course id
-    const { error: assignmentError } = await supabase
+    const { data: savedAssignments, error: assignmentError } = await supabase
       .from("assignments")
       .insert(
         assignments.map((assignment) => ({
@@ -185,14 +185,19 @@ const saveCourseDataToSupabase = async (
           reminder: assignment.reminder,
           created_at: new Date().toISOString(),
         }))
-      );
+      )
+      .select('id, name, description, due_date, color, start_time, end_time, reminder');
 
     if (assignmentError) {
       console.error("Error inserting assignment data:", assignmentError);
       throw new Error("Failed to save assignment data");
     }
 
-    return true;
+    // Transform the saved data back into the expected CourseData format
+    return {
+      course_name: course.course_name,
+      assignments: savedAssignments as Assignment[] || []
+    };
   } catch (error: any) {
     console.error("Error in saveCourseDataToSupabase:", error);
     throw error;
@@ -294,7 +299,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await saveCourseDataToSupabase(
+   const savedCourseData =  await saveCourseDataToSupabase(
       courseData,
       userAuthenticated.success as User,
       supabaseClient
@@ -302,7 +307,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: "Syllabus processed successfully",
-      data: courseData,
+      data: savedCourseData,
     });
   } catch (error: any) {
     console.error("Error processing document:", error);
