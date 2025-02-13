@@ -52,7 +52,7 @@ export default function DashboardHeader({
                 >
                   <div className="relative h-8 w-8">
                     <Image
-                      src={user?.user_metadata.avatar_url}
+                      src={user?.user_metadata.avatar_url || "/placeholder-profile.svg"}
                       alt={"Profile"}
                       width={32}
                       height={32}
@@ -60,7 +60,7 @@ export default function DashboardHeader({
                     />
                   </div>
                   <span className="hidden md:block text-sm font-medium text-gray-700">
-                    {user?.user_metadata.full_name}
+                    {user?.user_metadata.full_name || user?.email}
                   </span>
                 </button>
 

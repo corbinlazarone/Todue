@@ -44,6 +44,8 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
     if (isMobile) {
       setIsSidebarOpen(false);
     }
+
+    console.log(user.app_metadata.providers);
   };
 
   const handleAddToGoogleCalendar = async () => {
@@ -105,24 +107,26 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
           </button>
         </nav>
 
-        {/* Bottom Cards */}
-        <div className="absolute bottom-4 left-4 right-4 space-y-4">
-          <div className="p-4 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-            <h3 className="text-sm font-medium">Sync Google Account</h3>
-            <p className="mt-1 text-xs opacity-90">
-              Your Google account is not connected. Sync your account to enable
-              add to calendar feature.
-            </p>
-            <button
-              onClick={() => {
-                router.push("/sign-in?reauth=true");
-              }}
-              className="mt-2 w-full px-3 py-1.5 text-sm font-medium bg-white text-indigo-600 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              Sync Account
-            </button>
+        {/* Google Sign in Card */}
+        {!user.app_metadata.providers.includes("google") && (
+          <div className="absolute bottom-4 left-4 right-4 space-y-4">
+            <div className="p-4 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+              <h3 className="text-sm font-medium">Sync Google Account</h3>
+              <p className="mt-1 text-xs opacity-90">
+                Your Google account is not connected. Sync your account to
+                enable add to calendar feature.
+              </p>
+              <button
+                onClick={() => {
+                  router.push("/sign-in?reauth=true");
+                }}
+                className="mt-2 w-full px-3 py-1.5 text-sm font-medium bg-white text-indigo-600 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Sync Account
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Main Content */}
@@ -138,10 +142,7 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
                 isSidebarOpen ? "md:pl-64" : "md:pl-0"
               }`}
             >
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-xl font-semibold">Upload History</h2>
-                <HistoryContent />
-              </div>
+              <HistoryContent isSidebarOpen={isSidebarOpen} />
             </div>
           )}
         </main>
