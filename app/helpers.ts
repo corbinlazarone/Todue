@@ -45,8 +45,6 @@ export const checkUserSubscription = async (
 ): Promise<SubscriptionResponse> => {
   const supabase = await createClient();
 
-  console.log(email);
-
   const { data: userSub, error: subError } = await supabase
     .from("stripe_customers")
     .select("has_access")

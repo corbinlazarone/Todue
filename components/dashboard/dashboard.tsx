@@ -44,8 +44,6 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
     if (isMobile) {
       setIsSidebarOpen(false);
     }
-
-    console.log(user.app_metadata.providers);
   };
 
   const handleAddToGoogleCalendar = async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -33,10 +33,51 @@ interface HistoryContentProps {
   isSidebarOpen?: boolean;
 }
 
+interface Alert {
+  type?: "info" | "success" | "warning" | "error";
+  message: string;
+}
+
 export default function HistoryContent({
   isSidebarOpen = true,
 }: HistoryContentProps) {
+  const [alert, setAlert] = useState<Alert | null>(null);
+  const [courseHistory, setCourseHistory] = useState<CourseData[]>([]);
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
+
+
+  useEffect(() => {
+
+    const fetchCourseHistory = async () => {
+      try {
+        
+        const response = await fetch("/extraction/user-extraction-history");
+
+        const data = await response.json();
+
+        console.log(data);
+
+        if (data.error) {
+          setAlert({
+            type: "error",
+            message: data.error,
+          })
+        }
+
+        // set course history
+        setCourseHistory(data.data);
+
+      } catch (error: any) {
+        console.error("Error occurred while fetching course history: ", error);
+        setAlert({
+          type: "error",
+          message: "Unexpected error occurred. Please try again later.",
+        });
+      }
+    }
+
+    fetchCourseHistory();
+  }, []);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -70,271 +111,6 @@ export default function HistoryContent({
     return `${minutes} minute${minutes > 1 ? "s" : ""} before`;
   };
 
-  // Mock data - replace with actual data fetching
-  const courseHistory: CourseData[] = [
-    {
-      id: "91fe7ead-916e-4c30-8289-44c095094ed2",
-      course_name: "General Biology",
-      created_at: "2025-02-13T05:08:58.018+00:00",
-      assignments: [
-        {
-          id: 524775,
-          name: "Test update class assignemnt 1",
-          color: "#616161",
-          due_date: "2023-09-08",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: "This is an updated class assignment!!!!!!1",
-        },
-        {
-          id: 929137,
-          name: "Class Assignment #2",
-          color: "#e67c73",
-          due_date: "2023-09-08",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 657805,
-          name: "Class Assignment #3",
-          color: "#039be5",
-          due_date: "2023-09-15",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 186632,
-          name: "Class Assignment #4",
-          color: "#7986cb",
-          due_date: "2023-09-22",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 460936,
-          name: "Class Assignment #5",
-          color: "#616161",
-          due_date: "2023-10-06",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 510736,
-          name: "Class Assignment #6",
-          color: "#33b679",
-          due_date: "2023-10-20",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 443042,
-          name: "Class Assignment #7",
-          color: "#616161",
-          due_date: "2023-10-27",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 903218,
-          name: "Class Assignment #8",
-          color: "#e67c73",
-          due_date: "2023-11-10",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 350092,
-          name: "Class Assignment #9",
-          color: "#d60000",
-          due_date: "2023-11-17",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 88507,
-          name: "Class Assignment #10",
-          color: "#039be5",
-          due_date: "2023-12-01",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-      ],
-    },
-    {
-      id: "7b01ba79-e5c4-4f86-a785-83712522bb0f",
-      course_name: "CALCULUS I I MATH 155 2 SECTION 07",
-      created_at: "2025-02-12T22:39:31.993+00:00",
-      assignments: [
-        {
-          id: 697636,
-          name: "Final Exam",
-          color: "#3f51b5",
-          due_date: "2023-05-07",
-          end_time: "14:30:00",
-          reminder: 1440,
-          start_time: "12:30:00",
-          description: "Comprehensive",
-        },
-        {
-          id: 255679,
-          name: "Exam 1",
-          color: "#7986cb",
-          due_date: "2023-02-07",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "00:00:00",
-          description: "",
-        },
-        {
-          id: 884877,
-          name: "Exam 2",
-          color: "#33b679",
-          due_date: "2023-03-12",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "00:00:00",
-          description: "",
-        },
-        {
-          id: 841277,
-          name: "Exam 3",
-          color: "#33b679",
-          due_date: "2023-04-17",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "00:00:00",
-          description: "",
-        },
-      ],
-    },
-    {
-      id: "d81b40aa-3c4f-4592-9f50-fb797343edff",
-      course_name: "BIOL 100 2: General Biology",
-      created_at: "2025-02-10T21:45:37.46+00:00",
-      assignments: [
-        {
-          id: 505528,
-          name: "Class Assignment #1",
-          color: "#e67c73",
-          due_date: "2023-09-08",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 729669,
-          name: "Class Assignment #2",
-          color: "#0b8043",
-          due_date: "2023-09-08",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 674423,
-          name: "Class Assignment #3",
-          color: "#0b8043",
-          due_date: "2023-09-15",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 454237,
-          name: "Class Assignment #4",
-          color: "#0b8043",
-          due_date: "2023-09-22",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 645627,
-          name: "Class Assignment #5",
-          color: "#7986cb",
-          due_date: "2023-10-06",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 156617,
-          name: "Class Assignment #6",
-          color: "#f6c026",
-          due_date: "2023-10-20",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 624422,
-          name: "Class Assignment #7",
-          color: "#f5511d",
-          due_date: "2023-10-27",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 713256,
-          name: "Class Assignment #8",
-          color: "#f5511d",
-          due_date: "2023-11-10",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 299577,
-          name: "Class Assignment #9",
-          color: "#039be5",
-          due_date: "2023-11-17",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-        {
-          id: 430413,
-          name: "Class Assignment #10",
-          color: "#3f51b5",
-          due_date: "2023-12-01",
-          end_time: "23:59:00",
-          reminder: 1440,
-          start_time: "23:59:00",
-          description: null,
-        },
-      ],
-    },
-  ];
-
   return (
     <div
       className={`w-full transition-all duration-300 ${
@@ -360,7 +136,7 @@ export default function HistoryContent({
               No Upload History
             </h3>
             <p className="text-sm text-gray-500 text-center">
-              Your uploaded course schedules will appear here
+              Your uploaded syllabus course history will appear here
             </p>
           </div>
         ) : (

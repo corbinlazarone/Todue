@@ -17,7 +17,6 @@ import {
 import PopupAlert from "@/components/ui/popup-alert";
 import { Select, SelectContent, SelectItem, SelectValue } from "../ui/select";
 import { SelectTrigger } from "@radix-ui/react-select";
-import { Button } from "../ui/button";
 import { CalendarTrigger } from "../ui/calendar";
 
 interface Alert {
@@ -311,9 +310,7 @@ export default function DocumentUpload({
 
   const handleAddNew = (newAssignment: Omit<Assignment, "id">) => {
 
-    /**
-     * This will call a API endpoint to insert a assignment manually
-     */
+    // TODO: This will call a API endpoint to insert a assignment manually
 
     if (!assignments) {
       setAssignments([{ ...newAssignment, id: 1 }]);
