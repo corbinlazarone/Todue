@@ -94,7 +94,6 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
           <button
             onClick={() => {
               handleTabClick("history");
-              handleAddToGoogleCalendar();
             }}
             className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-between ${
               activeTab === "history"
