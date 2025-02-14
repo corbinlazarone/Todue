@@ -36,6 +36,7 @@ interface Assignment {
 }
 
 interface CourseData {
+  course_id: number;
   course_name: string;
   assignments: Assignment[];
 }
@@ -243,7 +244,7 @@ export default function DocumentUpload({
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<Alert | null>(null);
   const [assignments, setAssignments] = useState<Assignment[] | null>(null);
-  const [courseName, setCourseName] = useState<string | null>(null);
+  const [courseData, setCourseData] = useState<CourseData | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [uploadingToCalendar, setUploadingToCalendar] = useState(false);
@@ -276,7 +277,7 @@ export default function DocumentUpload({
         });
       }
 
-      setCourseName(data.data.course_name);
+      setCourseData(data.data);
       setAssignments(data.data.assignments);
     } catch (error: any) {
       console.error(error);
@@ -470,7 +471,7 @@ export default function DocumentUpload({
           {/* Quick Stats */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {courseName || "Course Name"}
+              {courseData?.course_name || "Course Name"}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 rounded-lg p-4">
@@ -488,9 +489,9 @@ export default function DocumentUpload({
           <h2 className="text-lg font-semibold text-gray-900">Assignments</h2>
           <button
             onClick={() => setShowNewForm(true)}
-            disabled={!courseName}
+            disabled={!courseData?.course_name}
             className={`w-full sm:w-auto flex items-center justify-center px-3 py-1.5 text-sm border rounded-lg transition-colors ${
-              courseName 
+              courseData?.course_name 
                 ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50" 
                 : "text-gray-400 border-gray-200 cursor-not-allowed"
             }`}
@@ -511,9 +512,9 @@ export default function DocumentUpload({
             </p>
             <button
               onClick={() => setShowNewForm(true)}
-              disabled={!courseName}
+              disabled={!courseData?.course_name}
               className={`flex items-center px-4 py-2 text-sm border rounded-lg transition-colors ${
-                courseName
+                courseData?.course_name
                   ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
                   : "text-gray-400 border-gray-200 cursor-not-allowed"
               }`}
@@ -533,9 +534,9 @@ export default function DocumentUpload({
             </p>
             <button
               onClick={() => setShowNewForm(true)}
-              disabled={!courseName}
+              disabled={!courseData?.course_name}
               className={`flex items-center px-4 py-2 text-sm border rounded-lg transition-colors ${
-                courseName
+                courseData?.course_name
                   ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
                   : "text-gray-400 border-gray-200 cursor-not-allowed"
               }`}
