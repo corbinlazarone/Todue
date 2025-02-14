@@ -1,7 +1,6 @@
 import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
-import { createClient } from "@/utils/supabase/server";
 import { SupabaseClient, User } from "@supabase/supabase-js";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const getCourseDataHistory = async (
   signedInUser: User,

@@ -7,7 +7,6 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 import { Anthropic } from "@anthropic-ai/sdk";
 import { SupabaseClient, User } from "@supabase/supabase-js";
-import { createClient } from "@/utils/supabase/server";
 
 interface FileData {
   buffer: Buffer;
@@ -27,6 +26,7 @@ interface Assignment {
 }
 
 interface CourseData {
+  course_id: number;
   course_name: string;
   assignments: Assignment[];
 }
@@ -157,7 +157,7 @@ const saveCourseDataToSupabase = async (
           created_at: new Date().toISOString(),
         }
       ])
-      .select()
+      .select("id, course_name")
       .single();
     
     if (courseError) {
@@ -195,6 +195,7 @@ const saveCourseDataToSupabase = async (
 
     // Transform the saved data back into the expected CourseData format
     return {
+      course_id: course.id,
       course_name: course.course_name,
       assignments: savedAssignments as Assignment[] || []
     };
@@ -206,6 +207,7 @@ const saveCourseDataToSupabase = async (
 
 export async function POST(request: NextRequest) {
   try {
+
     /**
      * Chceking if user is authenticated
      */

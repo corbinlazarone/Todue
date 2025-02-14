@@ -1,9 +1,8 @@
 import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
-import { SupabaseClient, User } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 interface Assignment {
-  id: number;
   name: string;
   description: string;
   due_date: string;
@@ -13,36 +12,62 @@ interface Assignment {
   reminder: number;
 }
 
-const updateAssignment = async (
+interface AssignmentFromDB {
+  id: number;
+  name: string;
+  description: string;
+  due_date: string;
+  color: string;
+  start_time: string;
+  end_time: string;
+  reminder: number;
+  created_at: string;
+}
+
+const insertAssignment = async (
+  courseId: any,
   assignment: Assignment,
   supabase: SupabaseClient
-) => {
+): Promise<AssignmentFromDB> => {
   try {
-    const { id, name, description, due_date, color, start_time, end_time } =
-      assignment;
+    const {
+      name,
+      description,
+      due_date,
+      color,
+      start_time,
+      end_time,
+      reminder,
+    } = assignment;
 
-    const { data: updatedAssignment, error: updateError } = await supabase
+    const { data: insertedAssignment, error: insertError } = await supabase
       .from("assignments")
-      .update({
+      .insert({
+        id: Math.floor(Math.random() * 1000000) + 1,
+        course_id: courseId,
         name,
         description,
         due_date,
         color,
         start_time,
         end_time,
+        reminder,
+        created_at: new Date().toISOString(),
       })
-      .eq("id", id)
-      .select()
+      .eq("course_id", courseId)
+      .select(
+        "id, name, description, due_date, color, start_time, end_time, reminder, created_at"
+      )
       .single();
 
-    if (updateError) {
-      console.error("Error updating assignment in supabase: ", updateError);
-      throw new Error("Failed to update assignment");
+    if (insertError) {
+      console.error("Error inserting assignment in supabase: ", insertError);
+      throw new Error("Failed to insert assignment");
     }
 
-    return updatedAssignment;
+    return insertedAssignment;
   } catch (error: any) {
-    console.error("Error in updateAssignment: ", error);
+    console.error("Error in insertAssignment: ", error);
     throw error;
   }
 };
@@ -84,7 +109,7 @@ export async function POST(request: NextRequest) {
     }
 
     /**
-     * Supabase db query to update assignment
+     * Supabase client to insert assignment
      */
     const { supabaseClient } = userAuthenticated;
     if (!supabaseClient) {
@@ -95,21 +120,23 @@ export async function POST(request: NextRequest) {
     }
 
     /**
-     * Pass to update assignmet function
+     * Insert assignment
      */
     const assignment: Assignment = body.assignment;
+    const courseId: any = body.courseId;
 
-    const updatedAssignment = await updateAssignment(
+    const insertedAssignment: AssignmentFromDB = await insertAssignment(
+      courseId,
       assignment,
       supabaseClient
     );
 
     return NextResponse.json({
-      message: "Assignment updated successfully",
-      updatedAssignment: updatedAssignment,
+      message: "Success inserting assignment",
+      insertedAssignment: insertedAssignment,
     });
   } catch (error: any) {
-    console.error("Error in POST /update-assignment: ", error);
+    console.error("Error in POST /insert-manual-assignment: ", error);
     return NextResponse.json(
       { error: "An unexpected error occurred. Try again later." },
       { status: 500 }

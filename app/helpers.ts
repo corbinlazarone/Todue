@@ -73,6 +73,8 @@ export const fetchUserSession = async (): Promise<SessionResponse> => {
     return { error: "Error fetching user session" };
   }
 
+  console.log(session);
+
   return { success: session };
 };
 
