@@ -18,6 +18,16 @@ import PopupAlert from "@/components/ui/popup-alert";
 import { Select, SelectContent, SelectItem, SelectValue } from "../ui/select";
 import { SelectTrigger } from "@radix-ui/react-select";
 import { CalendarTrigger } from "../ui/calendar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 
 interface Alert {
   type?: "info" | "success" | "warning" | "error";
@@ -264,6 +274,9 @@ export default function DocumentUpload({
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(
     null
   );
+  const [deletingAssignment, setDeleteAssignment] = useState<Assignment | null>(
+    null
+  );
   const [showNewForm, setShowNewForm] = useState(false);
   const [uploadingToCalendar, setUploadingToCalendar] = useState(false);
 
@@ -315,31 +328,107 @@ export default function DocumentUpload({
   const handleSave = async (id: number, updatedData: Partial<Assignment>) => {
     if (!assignments) return;
     setLoading(true);
+
     try {
-      // Here you would typically make an API call to update the assignment
-      // For now, we'll just update the local state
-      setAssignments(
-        assignments.map((a) => (a.id === id ? { ...a, ...updatedData } : a))
-      );
-      setAlert({
-        type: "success",
-        message: "Assignment updated successfully!",
+      const response = await fetch("/update-assignment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assignment: {
+            id: id,
+            ...updatedData,
+          },
+        }),
       });
-      setEditingAssignment(null);
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const updatedAssignment = {
+        ...assignments.find((a) => a.id === id),
+        ...updatedData,
+        id,
+      } as Assignment;
+
+      setAssignments(
+        assignments.map((a) => (a.id === id ? updatedAssignment : a))
+      );
+
+      if (data.message) {
+        setAlert({
+          type: "success",
+          message: data.message,
+        });
+      }
     } catch (error: any) {
+      console.error("Error updating assignment: ", error);
       setAlert({
         type: "error",
         message: error.message || "Failed to update assignment",
       });
     } finally {
       setLoading(false);
+      setEditingAssignment(null);
     }
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (!assignments) return;
 
-    setAssignments(assignments.filter((a) => a.id !== id));
+    const assignmentToDelete = assignments.find((a) => a.id === id);
+    if (assignmentToDelete) {
+      setDeleteAssignment(assignmentToDelete);
+    }
+  };
+
+  const confirmDelete = async () => {
+
+    if (!assignments || !deletingAssignment) return;
+    setLoading(true);
+
+    try {
+
+      const response = await fetch("/delete-assignment", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assignmentId: deletingAssignment.id,
+          courseId: courseData?.course_id
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setAssignments(assignments.filter((a) => a.id !== deletingAssignment.id));
+
+      if (data.message) {
+        setAlert({
+          type: "success",
+          message: data.message,
+        });
+      } 
+
+    } catch (error: any) {
+      console.error("Error deleting assignment: ", error);
+      setAlert({
+        type: "error",
+        message: error.message || "Failed to delete assignment",
+      })
+    } finally {
+      setLoading(false);
+      setDeleteAssignment(null);
+    }
   };
 
   const handleAddNew = async (newAssignment: Omit<Assignment, "id">) => {
@@ -744,6 +833,49 @@ export default function DocumentUpload({
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Delete Confirmation Modal */}
+        <AlertDialog
+          open={!!deletingAssignment}
+          onOpenChange={() => setDeleteAssignment(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Are you sure you want to delete this assignment?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This will remove our record of this assignment.
+              </AlertDialogDescription>
+              <div className="mt-2 font-medium text-amber-600">
+                You will have to re-upload the syllabus this assignment belongs
+                to if you choose to delete this assignment.
+              </div>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                disabled={loading}
+                onClick={() => setDeleteAssignment(null)}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                disabled={loading}
+                onClick={confirmDelete}
+                className="bg-red-600 hover:bg-red-700 text-white font-medium"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete Assignment"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

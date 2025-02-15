@@ -2,16 +2,6 @@ import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
-interface Assignment {
-  name: string;
-  description: string;
-  due_date: string;
-  color: string;
-  start_time: string;
-  end_time: string;
-  reminder: number;
-}
-
 interface AssignmentFromDB {
   id: number;
   name: string;
@@ -24,55 +14,32 @@ interface AssignmentFromDB {
   created_at: string;
 }
 
-const insertAssignment = async (
-  courseId: any,
-  assignment: Assignment,
+const deleteAssignment = async (
+  courseId: number,
+  assignmentId: number,
   supabase: SupabaseClient
 ): Promise<AssignmentFromDB> => {
   try {
-    const {
-      name,
-      description,
-      due_date,
-      color,
-      start_time,
-      end_time,
-      reminder,
-    } = assignment;
-
-    const { data: insertedAssignment, error: insertError } = await supabase
+    const { data: deletedAssignment, error: deleteError } = await supabase
       .from("assignments")
-      .insert({
-        id: Math.floor(Math.random() * 1000000) + 1,
-        course_id: courseId,
-        name,
-        description,
-        due_date,
-        color,
-        start_time,
-        end_time,
-        reminder,
-        created_at: new Date().toISOString(),
-      })
+      .delete()
+      .eq("id", assignmentId)
       .eq("course_id", courseId)
-      .select(
-        "id, name, description, due_date, color, start_time, end_time, reminder, created_at"
-      )
       .single();
 
-    if (insertError) {
-      console.error("Error inserting assignment in supabase: ", insertError);
-      throw new Error("Failed to insert assignment");
+    if (deleteError) {
+      console.error("Error deleting assignment in supabase: ", deleteError);
+      throw new Error("Failed to delete assignment");
     }
 
-    return insertedAssignment;
+    return deletedAssignment;
   } catch (error: any) {
-    console.error("Error in insertAssignment: ", error);
+    console.error("Error in deleteAssignment: ", error);
     throw error;
   }
 };
 
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json();
 
@@ -109,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     /**
-     * Supabase client to insert assignment
+     * Supabase client to delete assignment
      */
     const { supabaseClient } = userAuthenticated;
     if (!supabaseClient) {
@@ -119,38 +86,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    /**
-     * Insert assignment
-     */
-    const assignment: Assignment = body.assignment;
-    const courseId: any = body.courseId;
+    const assignmentId: number = body.assignmentId;
+    const courseId: number = body.courseId;
 
-    if (!assignment) {
+    if (!assignmentId) {
       return NextResponse.json(
-        { error: "Assignment data is required" },
+        { error: "Assignment ID is required" },
         { status: 400 }
       );
-    };
+    }
 
     if (!courseId) {
       return NextResponse.json(
         { error: "Course ID is required" },
         { status: 400 }
       );
-    };
+    }
 
-    const insertedAssignment: AssignmentFromDB = await insertAssignment(
+    const deletedAssignment = await deleteAssignment(
       courseId,
-      assignment,
+      assignmentId,
       supabaseClient
     );
 
     return NextResponse.json({
-      message: "Assignment created successfully!",
-      insertedAssignment: insertedAssignment,
+      message: "Assignment deleted successfully",
+      assignment: deletedAssignment,
     });
   } catch (error: any) {
-    console.error("Error in POST /insert-manual-assignment: ", error);
+    console.error("Error  in DELETE /delete-assignment: ", error);
     return NextResponse.json(
       { error: "An unexpected error occurred. Try again later." },
       { status: 500 }

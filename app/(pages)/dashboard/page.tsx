@@ -1,5 +1,6 @@
 import { signOutAction } from "@/app/actions";
 import DashboardComp from "@/components/dashboard/dashboard";
+import MainLayout from "@/components/dashboard/layout";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -14,5 +15,5 @@ export default async function DashboadPage() {
     return redirect("/sign-in");
   }
 
-  return <DashboardComp user={user} signOut={signOutAction}/>;
+  return <MainLayout user={user} signOut={signOutAction} />;
 }
