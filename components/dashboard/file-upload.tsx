@@ -88,7 +88,7 @@ function AssignmentForm({
     color: assignment?.color || COLORS[0].value,
     start_time: assignment?.start_time || "",
     end_time: assignment?.end_time || "",
-    reminder: assignment?.reminder || REMINDER_OPTIONS[0].value,
+    reminder: assignment?.reminder ?? REMINDER_OPTIONS[0].value,
   });
 
   return (
@@ -122,11 +122,14 @@ function AssignmentForm({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Due Date</label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Due Date
+          </label>
           <CalendarTrigger
             value={formData.due_date}
             onChange={(date) => setFormData({ ...formData, due_date: date })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
 
@@ -258,7 +261,9 @@ export default function DocumentUpload({
   const [alert, setAlert] = useState<Alert | null>(null);
   const [assignments, setAssignments] = useState<Assignment[] | null>(null);
   const [courseData, setCourseData] = useState<CourseData | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(
+    null
+  );
   const [showNewForm, setShowNewForm] = useState(false);
   const [uploadingToCalendar, setUploadingToCalendar] = useState(false);
 
@@ -304,16 +309,31 @@ export default function DocumentUpload({
   };
 
   const handleEdit = (assignment: Assignment) => {
-    setEditingId(assignment.id);
+    setEditingAssignment(assignment);
   };
 
-  const handleSave = (id: number, updatedData: Partial<Assignment>) => {
+  const handleSave = async (id: number, updatedData: Partial<Assignment>) => {
     if (!assignments) return;
-
-    setAssignments(
-      assignments.map((a) => (a.id === id ? { ...a, ...updatedData } : a))
-    );
-    setEditingId(null);
+    setLoading(true);
+    try {
+      // Here you would typically make an API call to update the assignment
+      // For now, we'll just update the local state
+      setAssignments(
+        assignments.map((a) => (a.id === id ? { ...a, ...updatedData } : a))
+      );
+      setAlert({
+        type: "success",
+        message: "Assignment updated successfully!",
+      });
+      setEditingAssignment(null);
+    } catch (error: any) {
+      setAlert({
+        type: "error",
+        message: error.message || "Failed to update assignment",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -345,16 +365,17 @@ export default function DocumentUpload({
         throw new Error(data.error);
       }
 
-      setAssignments(assignments ? 
-        [...assignments, data.insertedAssignment] : 
-        [data.insertedAssignment]
+      setAssignments(
+        assignments
+          ? [...assignments, data.insertedAssignment]
+          : [data.insertedAssignment]
       );
 
       if (data.message) {
         setAlert({
           type: "success",
-          message: data.message
-        })
+          message: data.message,
+        });
       }
 
       setShowNewForm(false);
@@ -548,121 +569,121 @@ export default function DocumentUpload({
           </button>
         </div>
 
-        {!assignments ? (
-          <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
-            <FileText className="h-12 w-12 text-gray-400 mb-3" />
-            <h3 className="text-lg font-medium text-gray-900 mb-1">
-              No Assignments Loaded
-            </h3>
-            <p className="text-sm text-gray-500 text-center mb-4">
-              Upload a syllabus to extract assignments
-            </p>
-            <button
-              onClick={() => setShowNewForm(true)}
-              disabled={!courseData?.course_name}
-              className={`flex items-center px-4 py-2 text-sm border rounded-lg transition-colors ${
-                courseData?.course_name
-                  ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                  : "text-gray-400 border-gray-200 cursor-not-allowed"
-              }`}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add First Assignment
-            </button>
-          </div>
-        ) : assignments.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
-            <FileText className="h-12 w-12 text-gray-400 mb-3" />
-            <h3 className="text-lg font-medium text-gray-900 mb-1">
-              No Assignments Yet
-            </h3>
-            <p className="text-sm text-gray-500 text-center mb-4">
-              Upload a syllabus
-            </p>
-            <button
-              onClick={() => setShowNewForm(true)}
-              disabled={!courseData?.course_name}
-              className={`flex items-center px-4 py-2 text-sm border rounded-lg transition-colors ${
-                courseData?.course_name
-                  ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                  : "text-gray-400 border-gray-200 cursor-not-allowed"
-              }`}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add First Assignment
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {assignments.map((assignment) => (
-              <motion.div
-                key={assignment.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow"
-              >
-                {editingId === assignment.id ? (
-                  <AssignmentForm
-                    assignment={assignment}
-                    onSave={(data) => handleSave(assignment.id, data)}
-                    onCancel={() => setEditingId(null)}
-                  />
-                ) : (
-                  <>
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <div
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: assignment.color }}
-                        />
-                        <h3 className="font-medium text-gray-900">
-                          {assignment.name}
-                        </h3>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <button
-                          onClick={() => handleEdit(assignment)}
-                          className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
-                        >
-                          <Edit2 className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(assignment.id)}
-                          className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </div>
+        {(() => {
+          if (!assignments) {
+            return (
+              <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+                <FileText className="h-12 w-12 text-gray-400 mb-3" />
+                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                  No Assignments Loaded
+                </h3>
+                <p className="text-sm text-gray-500 text-center mb-4">
+                  Upload a syllabus to extract assignments
+                </p>
+                <button
+                  onClick={() => setShowNewForm(true)}
+                  disabled={!courseData?.course_name}
+                  className={`flex items-center px-4 py-2 text-sm border rounded-lg transition-colors ${
+                    courseData?.course_name
+                      ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                      : "text-gray-400 border-gray-200 cursor-not-allowed"
+                  }`}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add First Assignment
+                </button>
+              </div>
+            );
+          }
 
-                    {assignment.description && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {assignment.description}
-                      </p>
-                    )}
+          if (assignments.length === 0) {
+            return (
+              <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+                <FileText className="h-12 w-12 text-gray-400 mb-3" />
+                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                  No Assignments Yet
+                </h3>
+                <p className="text-sm text-gray-500 text-center mb-4">
+                  Upload a syllabus
+                </p>
+                <button
+                  onClick={() => setShowNewForm(true)}
+                  disabled={!courseData?.course_name}
+                  className={`flex items-center px-4 py-2 text-sm border rounded-lg transition-colors ${
+                    courseData?.course_name
+                      ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                      : "text-gray-400 border-gray-200 cursor-not-allowed"
+                  }`}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add First Assignment
+                </button>
+              </div>
+            );
+          }
 
-                    <div className="space-y-1.5 text-sm">
-                      <div className="flex items-center text-gray-700">
-                        <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                        {formatDate(assignment.due_date)}
-                      </div>
-                      <div className="flex items-center text-gray-700">
-                        <Clock className="w-3.5 h-3.5 mr-1.5" />
-                        {formatTime(assignment.start_time)} -{" "}
-                        {formatTime(assignment.end_time)}
-                      </div>
-                      <div className="flex items-center text-gray-700">
-                        <AlertCircle className="w-3.5 h-3.5 mr-1.5" />
-                        {formatReminder(assignment.reminder)}
-                      </div>
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {assignments.map((assignment) => (
+                <motion.div
+                  key={assignment.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <div
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: assignment.color }}
+                      />
+                      <h3 className="font-medium text-gray-900">
+                        {assignment.name}
+                      </h3>
                     </div>
-                  </>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        )}
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => handleEdit(assignment)}
+                        className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(assignment.id)}
+                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {assignment.description && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {assignment.description}
+                    </p>
+                  )}
+
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex items-center text-gray-700">
+                      <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                      {formatDate(assignment.due_date)}
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <Clock className="w-3.5 h-3.5 mr-1.5" />
+                      {formatTime(assignment.start_time)} -{" "}
+                      {formatTime(assignment.end_time)}
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <AlertCircle className="w-3.5 h-3.5 mr-1.5" />
+                      {formatReminder(assignment.reminder)}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Add New Assignment Modal */}
         <AnimatePresence>
@@ -687,6 +708,36 @@ export default function DocumentUpload({
                   onSave={handleAddNew}
                   onCancel={() => setShowNewForm(false)}
                   isNew
+                  isLoading={loading}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Edit Assignment Modal */}
+        <AnimatePresence>
+          {editingAssignment && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            >
+              <div className="bg-white rounded-xl p-6 w-full max-w-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Edit Assignment</h3>
+                  <button
+                    onClick={() => setEditingAssignment(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <AssignmentForm
+                  assignment={editingAssignment}
+                  onSave={(data) => handleSave(editingAssignment.id, data)}
+                  onCancel={() => setEditingAssignment(null)}
                   isLoading={loading}
                 />
               </div>

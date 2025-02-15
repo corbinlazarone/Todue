@@ -7,6 +7,7 @@ import { Menu } from "lucide-react";
 import DashboardHeader from "./dash-header";
 import DocumentUpload from "./file-upload";
 import HistoryContent from "./history-content";
+import ProductivityTools from "./productivity-tools";
 
 interface DashboardCompProps {
   user: User;
@@ -92,6 +93,16 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
             Dashboard
           </button>
           <button
+            onClick={() => handleTabClick("productivity")}
+            className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === "productivity"
+                ? "bg-indigo-50 text-indigo-600"
+                : "text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            Productivity Tools
+          </button>
+          <button
             onClick={() => {
               handleTabClick("history");
             }}
@@ -133,6 +144,15 @@ export default function DashboardComp({ user, signOut }: DashboardCompProps) {
         <main className="pt-20">
           {activeTab === "upload" && (
             <DocumentUpload isSidebarOpen={isSidebarOpen} />
+          )}
+          {activeTab === "productivity" && (
+            <div
+              className={`transition-all duration-300 ${
+                isSidebarOpen ? "md:pl-64" : "md:pl-0"
+              }`}
+            >
+             <ProductivityTools isSidebarOpen={isSidebarOpen} />
+            </div>
           )}
           {activeTab === "history" && (
             <div

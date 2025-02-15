@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface CustomCalendarProps {
   value: string;
@@ -144,12 +145,11 @@ export function CustomCalendar({ value, onChange, onClose }: CustomCalendarProps
   );
 }
 
-// Calendar Trigger Component for use in forms
-export function CalendarTrigger({ value, onChange }: CustomCalendarProps) {
+export function CalendarTrigger({ value, onChange, className }: CustomCalendarProps & { className?: string }) {
   const [open, setOpen] = useState(false);
   
   const displayDate = value ? parseDate(value).toLocaleDateString() : 'Select date';
-  
+
   function parseDate(dateStr: string) {
     const [year, month, day] = dateStr.split('-').map(Number);
     return new Date(year, month - 1, day);
@@ -158,12 +158,15 @@ export function CalendarTrigger({ value, onChange }: CustomCalendarProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full justify-start text-left font-normal"
+        <button
+          type="button"
+          className={cn(
+            "w-full text-left font-normal flex items-center",
+            className
+          )}
         >
           {displayDate}
-        </Button>
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <CustomCalendar 

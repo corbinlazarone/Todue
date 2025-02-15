@@ -44,37 +44,33 @@ export default function HistoryContent({
   const [alert, setAlert] = useState<Alert | null>(null);
   const [courseHistory, setCourseHistory] = useState<CourseData[]>([]);
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
-
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-
     const fetchCourseHistory = async () => {
       try {
-        
+        setIsLoading(true);
         const response = await fetch("/extraction/user-extraction-history");
-
         const data = await response.json();
-
-        console.log(data);
 
         if (data.error) {
           setAlert({
             type: "error",
             message: data.error,
-          })
+          });
         }
 
-        // set course history
         setCourseHistory(data.data);
-
       } catch (error: any) {
         console.error("Error occurred while fetching course history: ", error);
         setAlert({
           type: "error",
           message: "Unexpected error occurred. Please try again later.",
         });
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
 
     fetchCourseHistory();
   }, []);
@@ -111,6 +107,30 @@ export default function HistoryContent({
     return `${minutes} minute${minutes > 1 ? "s" : ""} before`;
   };
 
+  const LoadingSkeleton = () => (
+    <div className="space-y-4">
+      {[1, 2, 3].map((index) => (
+        <div
+          key={index}
+          className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+        >
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="h-5 w-48 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                <div className="h-5 w-5 bg-gray-200 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div
       className={`w-full transition-all duration-300 ${
@@ -123,13 +143,15 @@ export default function HistoryContent({
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Upload History</h1>
             <p className="text-sm text-gray-500 mt-1">
-            View your previously uploaded course syllabuses and assignments
+              View your previously uploaded course syllabuses and assignments
             </p>
           </div>
         </div>
 
-        {/* Course History List */}
-        {courseHistory.length === 0 ? (
+        {/* Loading State */}
+        {isLoading ? (
+          <LoadingSkeleton />
+        ) : courseHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
             <FileText className="h-12 w-12 text-gray-400 mb-3" />
             <h3 className="text-lg font-medium text-gray-900 mb-1">
