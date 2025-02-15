@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({
-      message: "Success inserting assignment",
+      message: "Assignment created successfully!",
       insertedAssignment: insertedAssignment,
     });
   } catch (error: any) {

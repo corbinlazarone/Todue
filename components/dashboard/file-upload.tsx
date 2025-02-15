@@ -46,6 +46,7 @@ interface AssignmentFormProps {
   onSave: (data: any) => void;
   onCancel: () => void;
   isNew?: boolean;
+  isLoading?: boolean;
 }
 
 interface DocumentUploadProps {
@@ -78,6 +79,7 @@ function AssignmentForm({
   onSave,
   onCancel,
   isNew = false,
+  isLoading = false,
 }: AssignmentFormProps) {
   const [formData, setFormData] = useState({
     name: assignment?.name || "",
@@ -221,16 +223,27 @@ function AssignmentForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-800"
+          disabled={isLoading}
+          className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-800 disabled:opacity-50"
         >
           Cancel
         </button>
         <button
           type="button"
           onClick={() => onSave(formData)}
-          className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-md hover:from-indigo-700 hover:to-purple-700"
+          disabled={isLoading}
+          className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-md hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 flex items-center"
         >
-          {isNew ? "Add Assignment" : "Save Changes"}
+          {isLoading ? (
+            <>
+              <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+              {isNew ? "Adding..." : "Saving..."}
+            </>
+          ) : isNew ? (
+            "Add Assignment"
+          ) : (
+            "Save Changes"
+          )}
         </button>
       </div>
     </div>
@@ -309,17 +322,51 @@ export default function DocumentUpload({
     setAssignments(assignments.filter((a) => a.id !== id));
   };
 
-  const handleAddNew = (newAssignment: Omit<Assignment, "id">) => {
+  const handleAddNew = async (newAssignment: Omit<Assignment, "id">) => {
+    setLoading(true);
 
-    // TODO: This will call a API endpoint to insert a assignment manually
+    if (!newAssignment) return;
 
-    if (!assignments) {
-      setAssignments([{ ...newAssignment, id: 1 }]);
-    } else {
-      const newId = Math.max(...assignments.map((a) => a.id)) + 1;
-      setAssignments([...assignments, { ...newAssignment, id: newId }]);
+    try {
+      const response = await fetch("/insert-manual-assignment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          courseId: courseData?.course_id,
+          assignment: newAssignment,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setAssignments(assignments ? 
+        [...assignments, data.insertedAssignment] : 
+        [data.insertedAssignment]
+      );
+
+      if (data.message) {
+        setAlert({
+          type: "success",
+          message: data.message
+        })
+      }
+
+      setShowNewForm(false);
+    } catch (error: any) {
+      console.error(error);
+      setAlert({
+        type: "error",
+        message: error.message || "Failed to add new assignment",
+      });
+    } finally {
+      setLoading(false);
     }
-    setShowNewForm(false);
   };
 
   const handleUploadToCalendar = async () => {
@@ -491,8 +538,8 @@ export default function DocumentUpload({
             onClick={() => setShowNewForm(true)}
             disabled={!courseData?.course_name}
             className={`w-full sm:w-auto flex items-center justify-center px-3 py-1.5 text-sm border rounded-lg transition-colors ${
-              courseData?.course_name 
-                ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50" 
+              courseData?.course_name
+                ? "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
                 : "text-gray-400 border-gray-200 cursor-not-allowed"
             }`}
           >
@@ -640,6 +687,7 @@ export default function DocumentUpload({
                   onSave={handleAddNew}
                   onCancel={() => setShowNewForm(false)}
                   isNew
+                  isLoading={loading}
                 />
               </div>
             </motion.div>
