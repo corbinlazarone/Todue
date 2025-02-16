@@ -20,6 +20,8 @@ import FAQ from "./faq-section";
 import PricingCard from "../pricing/pricing-card";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
+import { HeroVideoDialog } from "../ui/demo-video";
+import UniversityMarquee from "../ui/university-manquee";
 
 const keyFeatures = [
   {
@@ -168,8 +170,8 @@ export default function LandingComp({ user }: LandingCompProps) {
           </button>
         </div>
 
-           {/* Mobile Navigation */}
-           <AnimatePresence>
+        {/* Mobile Navigation */}
+        <AnimatePresence>
           {isMenuOpen && (
             <motion.div
               initial="closed"
@@ -274,20 +276,17 @@ export default function LandingComp({ user }: LandingCompProps) {
         </section>
 
         {/* New Demo Video Section */}
-        <section className="py-8 px-4 md:px-6 flex justify-center">
-          <div className="w-full max-w-5xl">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#6366F1] to-[#4F46E5] rounded-2xl blur opacity-30"></div>
-              <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden">
-                {/* Video Container */}
-                <div className="relative">
-                  <div className="w-full h-[450px] md:h-[600px] rounded-xl overflow-hidden">
-                    {/* Replace with your video */}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <HeroVideoDialog
+          className="block dark:hidden"
+          animationStyle="top-in-bottom-out"
+          videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
+          thumbnailSrc="/todue-screenshot.png"
+          thumbnailAlt="Hero Video"
+        />
+
+        {/* University Marquee */}
+        <section className="py-20 relative overflow-hidden">
+        <UniversityMarquee />
         </section>
 
         {/* Key Features Section */}
