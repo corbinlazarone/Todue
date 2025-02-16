@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       assignments.map(async (assignment) => {
         const event = {
           summary: assignment.name,
-          description: `Assignment: ${assignment.name}`,
+          description: assignment.description,
           start: {
             dateTime: formatDateTime(
               assignment.due_date,
@@ -145,19 +145,19 @@ export async function POST(request: NextRequest) {
           },
         };
 
-        // const response = await calendar.events.insert({
-        //   calendarId: "primary",
-        //   requestBody: event,
-        // });
+        const response = await calendar.events.insert({
+          calendarId: "primary",
+          requestBody: event,
+        });
 
-        // if (!response.data.id) {
-        //   return NextResponse.json(
-        //     { error: "Unexpected Google Calendar error. Please Try again." },
-        //     { status: 500 }
-        //   );
-        // }
+        if (!response.data.id) {
+          return NextResponse.json(
+            { error: "Unexpected Google Calendar error. Please Try again." },
+            { status: 500 }
+          );
+        }
 
-        // return response.data.id;
+        return response.data.id;
       })
     );
 
@@ -197,8 +197,6 @@ function formatDateTime(date: string, time: string, timezone: string): string {
 
   // Convert to UTC while respecting the timezone
   const zonedDateTime = toZonedTime(dateTimeStr, timezone);
-
-  console.log(zonedDateTime);
 
   return zonedDateTime.toISOString();
 }

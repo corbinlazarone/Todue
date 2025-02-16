@@ -7,11 +7,7 @@ export async function GET(request: NextRequest) {
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const next = searchParams.get("next") || "/";
-
-  console.log("Token Hash:", token_hash);
-  console.log("Type:", type);
-  console.log("Next:", next);
-
+  
   if (!token_hash || !type) {
     console.error("Missing token_hash or type. Redirecting to error page.");
     return NextResponse.redirect(new URL("/error", request.url));

@@ -28,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 interface Alert {
   type?: "info" | "success" | "warning" | "error";
@@ -61,6 +62,7 @@ interface AssignmentFormProps {
 
 interface DocumentUploadProps {
   isSidebarOpen?: boolean;
+  userAuthGoogle?: boolean;
 }
 
 const COLORS = [
@@ -100,6 +102,39 @@ function AssignmentForm({
     end_time: assignment?.end_time || "",
     reminder: assignment?.reminder ?? REMINDER_OPTIONS[0].value,
   });
+  const [timeError, setTimeError] = useState<string | null>(null);
+
+  const validateTimes = (startTime: string , endTime: string) => {
+    if (!startTime || !endTime) return true;
+
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
+
+    const startDate = new Date();
+    startDate.setHours(startHour, startMinute, 0);
+
+    const endDate = new Date();
+    endDate.setHours(endHour, endMinute, 0);
+
+    return endDate > startDate;
+  }
+
+  const handleTimeChange = (field: 'start_time' | 'end_time', value: string) => {
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+
+    if (newFormData.start_time && newFormData.end_time) {
+      const isValid = validateTimes(newFormData.start_time, newFormData.end_time);
+      setTimeError(isValid ? null : "End time must be after start time");
+    } else {
+      setTimeError(null);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (timeError) return;
+    onSave(formData);
+  };
 
   return (
     <div className="space-y-6">
@@ -183,9 +218,7 @@ function AssignmentForm({
             <input
               type="time"
               value={formData.start_time}
-              onChange={(e) =>
-                setFormData({ ...formData, start_time: e.target.value })
-              }
+              onChange={(e) => handleTimeChange('start_time', e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
@@ -200,12 +233,15 @@ function AssignmentForm({
             <input
               type="time"
               value={formData.end_time}
-              onChange={(e) =>
-                setFormData({ ...formData, end_time: e.target.value })
-              }
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              onChange={(e) => handleTimeChange('end_time', e.target.value)}
+              className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+                timeError ? 'border-red-500' : 'border-gray-300'
+              }`}
             />
           </div>
+          {timeError && (
+            <p className="mt-1 text-sm text-red-600">{timeError}</p>
+          )}
         </div>
       </div>
 
@@ -225,7 +261,9 @@ function AssignmentForm({
           <SelectContent>
             {REMINDER_OPTIONS.map((option) => (
               <SelectItem key={option.value} value={option.value.toString()}>
-                {option.label}
+                 <div className="flex items-center">
+                    {option.label}
+                  </div>
               </SelectItem>
             ))}
           </SelectContent>
@@ -243,8 +281,8 @@ function AssignmentForm({
         </button>
         <button
           type="button"
-          onClick={() => onSave(formData)}
-          disabled={isLoading}
+          onClick={handleSubmit}
+          disabled={isLoading || !!timeError}
           className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-md hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 flex items-center"
         >
           {isLoading ? (
@@ -265,7 +303,9 @@ function AssignmentForm({
 
 export default function DocumentUpload({
   isSidebarOpen = true,
+  userAuthGoogle,
 }: DocumentUploadProps) {
+  const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<Alert | null>(null);
@@ -283,8 +323,13 @@ export default function DocumentUpload({
   const handleExtraction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
-
     setLoading(true);
+
+    // check if user is authenticated with google
+    if (!userAuthGoogle) {
+      router.push("/sign-in?reauth=true");
+      return;
+    }
 
     try {
       const formData = new FormData();
@@ -387,12 +432,10 @@ export default function DocumentUpload({
   };
 
   const confirmDelete = async () => {
-
     if (!assignments || !deletingAssignment) return;
     setLoading(true);
 
     try {
-
       const response = await fetch("/delete-assignment", {
         method: "DELETE",
         headers: {
@@ -400,8 +443,8 @@ export default function DocumentUpload({
         },
         body: JSON.stringify({
           assignmentId: deletingAssignment.id,
-          courseId: courseData?.course_id
-        })
+          courseId: courseData?.course_id,
+        }),
       });
 
       const data = await response.json();
@@ -417,14 +460,13 @@ export default function DocumentUpload({
           type: "success",
           message: data.message,
         });
-      } 
-
+      }
     } catch (error: any) {
       console.error("Error deleting assignment: ", error);
       setAlert({
         type: "error",
         message: error.message || "Failed to delete assignment",
-      })
+      });
     } finally {
       setLoading(false);
       setDeleteAssignment(null);
@@ -482,13 +524,30 @@ export default function DocumentUpload({
   const handleUploadToCalendar = async () => {
     setUploadingToCalendar(true);
     try {
-      // Add your calendar upload logic here
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulated delay
-      setAlert({
-        type: "success",
-        message: "Successfully uploaded to calendar!",
+      const response = await fetch("/add-to-calendar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ assignments: assignments }),
       });
-    } catch (error) {
+
+      const contentType = response.headers.get("Content-Type");
+
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        setAlert({
+          type: "success",
+          message: "Assignments added to Google Calendar successfully!",
+        });
+      } else {
+        router.push("/sign-in?reauth=true");
+      }
+    } catch (error: any) {
       setAlert({
         type: "error",
         message: "Failed to upload to calendar",
