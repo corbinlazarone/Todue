@@ -10,6 +10,7 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
+import PopupAlert from "../ui/popup-alert";
 
 interface Assignment {
   id: number;
@@ -138,6 +139,15 @@ export default function HistoryContent({
       }`}
     >
       <div className="max-w-7xl mx-auto pr-4">
+        {alert && (
+          <PopupAlert
+            message={alert.message}
+            type={alert.type}
+            duration={3000}
+            onClose={() => setAlert(null)}
+          />
+        )}
+
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
