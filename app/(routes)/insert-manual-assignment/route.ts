@@ -53,6 +53,8 @@ const insertAssignment = async (
         end_time,
         reminder,
         created_at: new Date().toISOString(),
+        completed: false,
+        completed_at: null,
       })
       .eq("course_id", courseId)
       .select(

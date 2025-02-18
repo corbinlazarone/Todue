@@ -184,6 +184,8 @@ const saveCourseDataToSupabase = async (
           end_time: assignment.end_time,
           reminder: assignment.reminder,
           created_at: new Date().toISOString(),
+          completed: false,
+          completed_at: null,
         }))
       )
       .select('id, name, description, due_date, color, start_time, end_time, reminder');

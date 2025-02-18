@@ -1,5 +1,5 @@
 import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
-import { console } from "inspector";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 interface Assignment {
@@ -16,6 +16,53 @@ interface Assignment {
 interface MarkAssignment {
   markAssignment: boolean;
 }
+
+interface Alert {
+  type?: "info" | "success" | "warning" | "error";
+  message: string;
+}
+
+const markAssignmentInDB = async (
+  assignment: Assignment,
+  markAssignment: MarkAssignment,
+  supabase: SupabaseClient
+) => {
+  try {
+    // Create update object based on whether we're marking or unmarking
+    const updateData = markAssignment
+      ? {
+          completed: true,
+          completed_at: new Date().toISOString(),
+        }
+      : {
+          completed: false,
+          completed_at: null,
+        };
+
+        console.log(updateData);
+
+    const { data: updatedAssignment, error: markAssignmentError } =
+      await supabase
+        .from("assignments")
+        .update(updateData)
+        .eq("id", assignment.id)
+        .select("*")
+        .single();
+
+    if (markAssignmentError) {
+      console.error(
+        "Error marking assignment in supabase: ",
+        markAssignmentError
+      );
+      throw new Error("Failed to mark assignment");
+    }
+
+    return updatedAssignment;
+  } catch (error: any) {
+    console.error("Error marking assignment in DB: ", error);
+    throw error;
+  }
+};
 
 export async function PUT(request: NextRequest) {
   try {
@@ -59,7 +106,7 @@ export async function PUT(request: NextRequest) {
     const { supabaseClient } = userAuthenticated;
     if (!supabaseClient) {
       return NextResponse.json(
-        { error: "Supabase not intialized" },
+        { error: "Supabase not initialized" },
         { status: 500 }
       );
     }
@@ -84,10 +131,26 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // markAssignment is a boolean, just insert that value to the database
-    // and when that assignment was mark completed
+    const updatedAssignment = await markAssignmentInDB(
+      assignment,
+      markAssignment,
+      supabaseClient
+    );
 
-    return NextResponse.json({ message: "Success" }, { status: 200 });
+    const actionMessage: Alert = markAssignment
+      ? {
+          type: "success",
+          message: "Assignment marked as completed",
+        }
+      : {
+          type: "warning",
+          message: "Assignment marked as incomplete",
+        };
+
+    return NextResponse.json(
+      { message: actionMessage, assignment: updatedAssignment },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error("Error in PUT /mark-assignment: ", error);
     return NextResponse.json(

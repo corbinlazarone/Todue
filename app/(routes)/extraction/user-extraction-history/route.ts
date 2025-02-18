@@ -12,7 +12,7 @@ const getCourseDataHistory = async (
     const { data: courseHistory, error: courseHistoryError } = await supabase
       .from("courses")
       .select(
-        `id, course_name, created_at, assignments (id, name, description, due_date, color, start_time, end_time, reminder)`
+        `id, course_name, created_at, assignments (id, name, description, due_date, color, start_time, end_time, reminder, completed, completed_at)`
       )
       .eq("user_id", userid)
       .order("created_at", { ascending: false });

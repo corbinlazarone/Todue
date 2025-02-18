@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  List,
-  Check,
-  CalendarX,
-  FileText,
-  Clock,
-  Calendar,
-} from "lucide-react";
+import { List, Check, FileText, Clock, Calendar } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -28,6 +21,7 @@ import {
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import PopupAlert from "../ui/popup-alert";
+import confetti from "canvas-confetti";
 
 interface Assignment {
   id: number;
@@ -38,6 +32,8 @@ interface Assignment {
   start_time: string;
   end_time: string;
   reminder: number;
+  completed: boolean;
+  completed_at?: string;
 }
 
 interface CourseData {
@@ -60,7 +56,9 @@ export default function ProductivityTools({
   isSidebarOpen = true,
 }: ProductivityToolsProps) {
   const [selectedCourse, setSelectedCourse] = useState<string>("all");
-  const [completedAssignments, setCompletedAssignments] = useState<number[]>([]);
+  const [completedAssignments, setCompletedAssignments] = useState<number[]>(
+    []
+  );
   const [courseData, setCourseData] = useState<CourseData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [alert, setAlert] = useState<Alert | null>(null);
@@ -96,6 +94,13 @@ export default function ProductivityTools({
         }
 
         setCourseData(data.data);
+
+        const completedAssignmentIds = data.data
+          .flatMap((course: CourseData) => course.assignments)
+          .filter((assignment: Assignment) => assignment.completed)
+          .map((assignment: Assignment) => assignment.id);
+
+        setCompletedAssignments(completedAssignmentIds);
       } catch (error: any) {
         console.error("Error occurred while fetching course history: ", error);
         setAlert({
@@ -110,31 +115,56 @@ export default function ProductivityTools({
     fetchCourseHistory();
   }, []);
 
-  const toggleAssignment = async (id: number, event: React.MouseEvent) => {
+  const toggleAssignment = async (
+    assignment: Assignment,
+    event: React.MouseEvent
+  ) => {
     event.stopPropagation();
-    setIsUpdating(id);
-    
-    // Mock API call with random delay between 0.5 and 1.5 seconds
+    setIsUpdating(assignment.id);
+
     try {
-      await new Promise((resolve) => 
-        setTimeout(resolve, Math.random() * 1000 + 500)
-      );
-      
-      setCompletedAssignments((prev) =>
-        prev.includes(id) ? prev.filter((aId) => aId !== id) : [...prev, id]
-      );
-      
-      setAlert({
-        type: completedAssignments.includes(id) ? "warning" : "success",
-        message: completedAssignments.includes(id)
-          ? `Marked assignment as incomplete`
-          : `Marked assignment as complete`,
+      // If the assignment is in completedAssignments, we're unmarking it (false)
+      // If it's not in completedAssignments, we're marking it (true)
+      const markAssignment = !completedAssignments.includes(assignment.id);
+
+      const response = await fetch("/mark-assignment", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assignment: assignment,
+          MarkAssignment: markAssignment,
+        }),
       });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setCompletedAssignments((prev) =>
+        prev.includes(assignment.id)
+          ? prev.filter((aId) => aId !== assignment.id)
+          : [...prev, assignment.id]
+      );
+
+      if (markAssignment) {
+        hanldeConfettiFireworks();
+      }
+
+      if (data.message) {
+        setAlert({
+          type: data.message.type,
+          message: data.message.message,
+        });
+      }
     } catch (error) {
-      console.error('Error updating assignment status:', error);
+      console.error("Error updating assignment status:", error);
       setAlert({
-        type: 'error',
-        message: 'Failed to update assignment status. Please try again.',
+        type: "error",
+        message: "Failed to update assignment status. Please try again.",
       });
     } finally {
       setIsUpdating(null);
@@ -173,6 +203,35 @@ export default function ProductivityTools({
       );
       return course?.id === selectedCourse;
     });
+  };
+
+  const hanldeConfettiFireworks = () => {
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    const randomInRange = (min: number, max: number) =>
+      Math.random() * (max - min) + min;
+
+    const interval = window.setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+      });
+    }, 250);
   };
 
   const LoadingSkeleton = () => (
@@ -275,7 +334,7 @@ export default function ProductivityTools({
                     >
                       <div className="flex items-center space-x-3">
                         <button
-                          onClick={(e) => toggleAssignment(assignment.id, e)}
+                          onClick={(e) => toggleAssignment(assignment, e)}
                           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center relative
                             ${
                               completedAssignments.includes(assignment.id)
@@ -288,7 +347,9 @@ export default function ProductivityTools({
                           disabled={isUpdating !== null}
                         >
                           {completedAssignments.includes(assignment.id) && (
-                            <Check className="w-3 h-3 text-white" />
+                            <Check
+                              className="w-3 h-3 text-white"
+                            />
                           )}
                           {isUpdating === assignment.id && (
                             <div className="absolute inset-0 flex items-center justify-center">
