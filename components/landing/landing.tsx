@@ -243,7 +243,7 @@ export default function LandingComp({ user }: LandingCompProps) {
       {/* Main Content */}
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16 sm:mt-20">
         {/* Hero Section */}
-        <section className="py-28 px-4 md:px-6">
+        <section className="py-20 px-4 md:px-6">
           <div className="max-w-6xl mx-auto text-center">
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
@@ -414,8 +414,7 @@ export default function LandingComp({ user }: LandingCompProps) {
               Transparent Pricing
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Looking for an Enterprise plan? Contact us at
-              corbinlazarone@todue.com
+              A plan for every situation, no matter the need.
             </p>
           </motion.div>
 

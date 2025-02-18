@@ -14,7 +14,7 @@ export default function PricingCard({ user }: PricingPlans) {
       name: "Historic syllabus data",
     },
     {
-      name: "Priority processing",
+      name: "Productivity Tools",
     },
     {
       name: "Google Calendar sync",
@@ -30,9 +30,6 @@ export default function PricingCard({ user }: PricingPlans) {
     },
     {
       name: "Custom API access",
-    },
-    {
-      name: "Custom integration options",
     },
     {
       name: "Advanced analytics",
