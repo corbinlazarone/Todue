@@ -1,5 +1,5 @@
 import { signOutAction } from "@/app/actions";
-import DashboardComp from "@/components/dashboard/dashboard";
+import DashboardComp from "@/components/dashboard/sections/dashboard";
 import MainLayout from "@/components/dashboard/layout";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";

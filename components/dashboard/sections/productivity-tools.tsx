@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import PopupAlert from "../ui/popup-alert";
+import PopupAlert from "../../ui/popup-alert";
 import confetti from "canvas-confetti";
 
 interface Assignment {

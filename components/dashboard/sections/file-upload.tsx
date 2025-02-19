@@ -15,9 +15,9 @@ import {
   X,
 } from "lucide-react";
 import PopupAlert from "@/components/ui/popup-alert";
-import { Select, SelectContent, SelectItem, SelectValue } from "../ui/select";
+import { Select, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { SelectTrigger } from "@radix-ui/react-select";
-import { CalendarTrigger } from "../ui/calendar";
+import { CalendarTrigger } from "@/components/ui/calendar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +27,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 
 interface Alert {

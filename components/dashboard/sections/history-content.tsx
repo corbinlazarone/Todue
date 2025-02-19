@@ -10,7 +10,7 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
-import PopupAlert from "../ui/popup-alert";
+import PopupAlert from "@/components/ui/popup-alert";
 
 interface Assignment {
   id: number;

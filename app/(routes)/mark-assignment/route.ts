@@ -39,8 +39,6 @@ const markAssignmentInDB = async (
           completed_at: null,
         };
 
-        console.log(updateData);
-
     const { data: updatedAssignment, error: markAssignmentError } =
       await supabase
         .from("assignments")

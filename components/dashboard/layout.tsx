@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import { ChartBar, FileStack, FileUp, LayoutGrid, Menu } from "lucide-react";
 import DashboardHeader from "./dash-header";
-import DocumentUpload from "./file-upload";
-import HistoryContent from "./history-content";
-import ProductivityTools from "./productivity-tools";
-import DashboardComp from "./dashboard";
+import DocumentUpload from "@/components/dashboard/sections/file-upload";
+import HistoryContent from "@/components/dashboard/sections/history-content";
+import ProductivityTools from "./sections/productivity-tools";
+import DashboardComp from "./sections/dashboard";
 
 interface DashboardCompProps {
   user: User;
