@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -105,18 +106,6 @@ export default function SignInComp() {
       {/* Main Content */}
       <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md">
-          {/* Back Button */}
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors mb-8"
-            onClick={() => {
-              router.push("/");
-            }}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </motion.button>
 
           {/* Sign In Form */}
           <motion.div

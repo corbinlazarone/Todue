@@ -99,7 +99,7 @@ export default function MainLayout({ user, signOut }: DashboardCompProps) {
         <main className="pt-20">
           {activeTab === "dashboard" && (
             <div className={`transition-all duration-300 ${isSidebarOpen ? "md:pl-64" : "md:pl-0"}`}>
-              <DashboardComp isSidebarOpen={isSidebarOpen} />
+              <DashboardComp isSidebarOpen={isSidebarOpen} user={user} />
             </div>
           )}
           {activeTab === "upload" && (

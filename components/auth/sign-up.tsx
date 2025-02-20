@@ -1,7 +1,8 @@
 "use client";
+
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import FormInput from "@/components/ui/input";
 import { signInWithGoogle, signUpAction } from "@/app/actions";
@@ -14,6 +15,7 @@ interface FormData {
   password: string;
   confirmPassword: string;
   callbackUrl: string;
+  acceptedTerms: boolean;
 }
 
 interface Alert {
@@ -30,6 +32,7 @@ export default function SignUpComp() {
     password: "",
     confirmPassword: "",
     callbackUrl: "",
+    acceptedTerms: false,
   });
 
   const handleGoogleOAuth = async () => {
@@ -52,6 +55,14 @@ export default function SignUpComp() {
   const handleSubmit = async (event: any) => {
     event.preventDefault();
 
+    if (!formData.acceptedTerms) {
+      setAlert({
+        type: "error",
+        message: "Please accept the Terms of Service and Privacy Policy to continue.",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await signUpAction(formData);
@@ -64,7 +75,7 @@ export default function SignUpComp() {
       console.error("Unexpected Sign up Error: ", error);
       setAlert({
         type: "error",
-        message: "Unexpected error occuried. Please Try again.",
+        message: "Unexpected error occurred. Please Try again.",
       });
     } finally {
       setLoading(false);
@@ -86,36 +97,23 @@ export default function SignUpComp() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md">
-          {/* Back Button */}
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors mb-8"
-            onClick={() => {
-              router.push("/");
-            }}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </motion.button>
-
-          {/* Sign In Form */}
+      <div className="min-h-screen pt-16 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md my-8">
+          {/* Sign Up Form */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 space-y-8"
+            className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100 space-y-6 sm:space-y-8"
           >
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 Create an Account
               </h2>
-              <p className="mt-2 text-gray-600">Make a Todue account</p>
+              <p className="mt-2 text-sm sm:text-base text-gray-600">Make a Todue account</p>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
               <FormInput
                 id="email"
                 required={true}
@@ -141,7 +139,7 @@ export default function SignUpComp() {
               />
 
               <FormInput
-                id="password"
+                id="confirmPassword"
                 required={true}
                 labelText="Confirm"
                 placeHolderText="Confirm your password"
@@ -154,6 +152,39 @@ export default function SignUpComp() {
                   });
                 }}
               />
+
+              <div className="flex items-start">
+                <div className="flex items-center h-5">
+                  <input
+                    id="terms"
+                    name="terms"
+                    type="checkbox"
+                    checked={formData.acceptedTerms}
+                    onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                  />
+                </div>
+                <div className="ml-3">
+                  <label htmlFor="terms" className="text-sm text-gray-600">
+                    I accept the{" "}
+                    <button
+                      type="button"
+                      onClick={() => router.push("/terms")}
+                      className="text-indigo-600 hover:text-indigo-500 font-medium"
+                    >
+                      Terms of Service
+                    </button>{" "}
+                    and{" "}
+                    <button
+                      type="button"
+                      onClick={() => router.push("/privacy")}
+                      className="text-indigo-600 hover:text-indigo-500 font-medium"
+                    >
+                      Privacy Policy
+                    </button>
+                  </label>
+                </div>
+              </div>
 
               <button
                 type="submit"

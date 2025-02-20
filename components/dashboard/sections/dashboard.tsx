@@ -7,9 +7,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
   LineChart,
   Line,
 } from "recharts";
@@ -19,14 +16,12 @@ import {
   Clock,
   Calendar,
   CheckCircle2,
-  AlertCircle,
-  Loader2,
   FileText,
   TrendingUp,
-  Bell,
   Activity,
 } from "lucide-react";
 import PopupAlert from "@/components/ui/popup-alert";
+import { User } from "@supabase/supabase-js";
 
 interface Assignment {
   id: number;
@@ -50,6 +45,7 @@ interface CourseData {
 
 interface DashboardCompProps {
   isSidebarOpen?: boolean;
+  user: User;
 }
 
 interface Alert {
@@ -59,6 +55,7 @@ interface Alert {
 
 export default function DashboardComp({
   isSidebarOpen = true,
+  user,
 }: DashboardCompProps) {
   const [courseData, setCourseData] = useState<CourseData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,6 +86,14 @@ export default function DashboardComp({
 
     fetchData();
   }, []);
+
+  const toTitleCase = (str: string) => {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
 
   const getStats = () => {
     const totalCourses = courseData.length;
@@ -241,7 +246,7 @@ export default function DashboardComp({
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Your Dashboard
+              Welcome Back {toTitleCase(user.user_metadata.full_name) || user.email}!
               </h1>
               <p className="text-sm text-gray-500 mt-1">View your stats</p>
             </div>
@@ -263,7 +268,7 @@ export default function DashboardComp({
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Your Dashboard
+              Welcome Back {toTitleCase(user.user_metadata.full_name) || user.email}!
               </h1>
               <p className="text-sm text-gray-500 mt-1">View your stats</p>
             </div>
@@ -303,7 +308,7 @@ export default function DashboardComp({
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Welcome Back User!</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Welcome Back {toTitleCase(user.user_metadata.full_name) || user.email}!</h1>
             <p className="text-sm text-gray-500 mt-1">View your stats</p>
           </div>
         </div>
