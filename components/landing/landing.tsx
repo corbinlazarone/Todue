@@ -1,15 +1,16 @@
 "use client";
+
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import {
   Check,
   Edit,
   HistoryIcon,
+  Instagram,
   Linkedin,
   Menu,
   Sparkles,
   Sun,
-  Twitter,
   Upload,
   X,
 } from "lucide-react";
@@ -181,7 +182,10 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
                 <Sun size={20} />
               </button> */}
             </div>
-            <button className="bg-[#6366F1] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#4F46ES] transition-all duration-300 hover:shadow-lg" onClick={handleAuth}>
+            <button
+              className="bg-[#6366F1] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#4F46ES] transition-all duration-300 hover:shadow-lg"
+              onClick={handleAuth}
+            >
               {user ? "Sign Out" : "Sign In"}
             </button>
           </nav>
@@ -310,7 +314,17 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
-                <PulsatingButton>Start Now</PulsatingButton>
+                <PulsatingButton
+                  onClick={() => {
+                    if (user) {
+                      router.push("/dashboard");
+                    } else {
+                      router.push("/sign-in");
+                    }
+                  }}
+                >
+                  Start Now
+                </PulsatingButton>
               </motion.div>
             </div>
           </div>
@@ -488,7 +502,16 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
               Let Todue handle your deadlines—automatically extracting
               assignments and exams so you can focus on what truly matters.
             </p>
-            <button className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-indigo-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold transition-all duration-300 hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-lg">
+            <button
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-indigo-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold transition-all duration-300 hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-lg"
+              onClick={() => {
+                if (user) {
+                  router.push("/dashboard");
+                } else {
+                  router.push("/sign-in");
+                }
+              }}
+            >
               Get Started Now
               <svg
                 className="w-5 h-5 ml-2"
@@ -526,7 +549,7 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
                 <ul className="mt-3 space-y-2">
                   <li>
                     <a
-                      href="#"
+                      href="/dashboard"
                       className="text-gray-600 hover:text-indigo-600 transition"
                     >
                       Dashboard
@@ -534,30 +557,27 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
                   </li>
                   <li>
                     <a
-                      href="#"
-                      className="text-gray-600 hover:text-indigo-600 transition"
+                      onClick={() => scrollToSection("pricing")}
+                      className="text-gray-600 hover:text-indigo-600 transition cursor-pointer"
                     >
                       Pricing
                     </a>
                   </li>
                   <li>
                     <a
-                      href="#"
-                      className="text-gray-600 hover:text-indigo-600 transition"
+                      onClick={() => scrollToSection("how-it-works")}
+                      className="text-gray-600 hover:text-indigo-600 transition cursor-pointer"
                     >
                       How it Works
                     </a>
                   </li>
                   <li>
                     <a
-                      href="#"
-                      className="text-gray-600 hover:text-indigo-600 transition"
+                      onClick={() => scrollToSection("contact")}
+                      className="text-gray-600 hover:text-indigo-600 transition cursor-pointer"
                     >
                       Contact
                     </a>
-                  </li>
-                  <li>
-                    <a>Blogs</a>
                   </li>
                 </ul>
               </div>
@@ -567,10 +587,20 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
                 <h3 className="text-lg font-semibold text-indigo-600">Legal</h3>
                 <ul className="mt-3 space-y-2">
                   <li>
-                    <a>Terms of Service</a>
+                    <a
+                      href="#"
+                      className="text-gray-600 hover:text-indigo-600 transition cursor-pointer"
+                    >
+                      Terms of Service
+                    </a>
                   </li>
                   <li>
-                    <a>Privacy Policy</a>
+                    <a
+                      href="#"
+                      className="text-gray-600 hover:text-indigo-600 transition cursor-pointer"
+                    >
+                      Privacy Policy
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -581,21 +611,20 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
                   Follow Us
                 </h3>
                 <div className="mt-3 flex space-x-4">
-                  <a
-                    href="#"
-                    className="text-gray-600 hover:text-indigo-600 transition"
-                  >
-                    <i className="fab fa-twitter">
-                      <Twitter />
-                    </i>
+                  <a href="#" className="text-gray-600 transition">
+                    <Image
+                      src="/twitter.svg"
+                      alt="Twitter"
+                      width={24}
+                      height={24}
+                      className="w-6 h-6"
+                    />
                   </a>
-                  <a
-                    href="#"
-                    className="text-gray-600 hover:text-indigo-600 transition"
-                  >
-                    <i className="fab fa-linkedin">
-                      <Linkedin />
-                    </i>
+                  <a href="#" className="text-gray-600 transition">
+                    <Linkedin className="w-6 h-6" />
+                  </a>
+                  <a href="#" className="text-gray-600 transition">
+                    <Instagram className="w-6 h-6" />
                   </a>
                 </div>
               </div>

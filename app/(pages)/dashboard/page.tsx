@@ -1,7 +1,9 @@
 import { signOutAction } from "@/app/actions";
 import MainLayout from "@/components/dashboard/layout";
+import LoadingPage from "@/components/ui/loading-page";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function DashboadPage() {
   const supabase = await createClient();
@@ -14,5 +16,9 @@ export default async function DashboadPage() {
     return redirect("/sign-in");
   }
 
-  return <MainLayout user={user} signOut={signOutAction} />;
+  return (
+    <Suspense fallback={<LoadingPage />}>
+      <MainLayout user={user} signOut={signOutAction} />
+    </Suspense>
+  );
 }
