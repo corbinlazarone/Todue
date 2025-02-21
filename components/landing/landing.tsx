@@ -22,6 +22,7 @@ import { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { HeroVideoDialog } from "../ui/demo-video";
 import UniversityMarquee from "../ui/university-manquee";
+import { useRouter } from "next/navigation";
 
 const keyFeatures = [
   {
@@ -97,9 +98,11 @@ const menuVariants = {
 
 interface LandingCompProps {
   user: User | null;
+  signOut: () => void;
 }
 
-export default function LandingComp({ user }: LandingCompProps) {
+export default function LandingComp({ user, signOut }: LandingCompProps) {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -113,6 +116,21 @@ export default function LandingComp({ user }: LandingCompProps) {
     };
   }, [isMenuOpen]);
 
+  const handleAuth = async () => {
+    if (user) {
+      signOut();
+    } else {
+      router.push("/sign-in");
+    }
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       <motion.header
@@ -122,7 +140,10 @@ export default function LandingComp({ user }: LandingCompProps) {
       >
         <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           {/* Branding Section */}
-          <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => router.push("/")}
+          >
             <Image src={"/logo.png"} alt="Todue logo" width={24} height={24} />
             <span className="font-bold text-lg bg-clip-text text-indigo-600">
               Todue
@@ -132,27 +153,36 @@ export default function LandingComp({ user }: LandingCompProps) {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center justify-center gap-8">
             <div className="flex items-center gap-6">
-              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer"
+              >
                 Dashboard
               </button>
-              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
+              <button
+                onClick={() => scrollToSection("pricing")}
+                className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer"
+              >
                 Pricing
               </button>
-              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
+              <button
+                onClick={() => scrollToSection("how-it-works")}
+                className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer"
+              >
                 How it Works
               </button>
-              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
+              <button
+                onClick={() => scrollToSection("contact")}
+                className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer"
+              >
                 Contact
               </button>
-              <button className="text-gray-600 hover:text-indigo-600 transition-colors text-sm font-medium cursor-pointer">
-                Blogs
-              </button>
-              <button>
+              {/* <button>
                 <Sun size={20} />
-              </button>
+              </button> */}
             </div>
-            <button className="bg-[#6366F1] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#4F46ES] transition-all duration-300 hover:shadow-lg">
-              {"Sign In"}
+            <button className="bg-[#6366F1] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#4F46ES] transition-all duration-300 hover:shadow-lg" onClick={handleAuth}>
+              {user ? "Sign Out" : "Sign In"}
             </button>
           </nav>
 
@@ -191,34 +221,44 @@ export default function LandingComp({ user }: LandingCompProps) {
                 }}
               >
                 <motion.button
+                  onClick={() => {
+                    router.push("/dashboard");
+                    setIsMenuOpen(false);
+                  }}
                   className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
                   variants={itemVariants}
                 >
                   Dashboard
                 </motion.button>
                 <motion.button
+                  onClick={() => {
+                    scrollToSection("pricing");
+                    setIsMenuOpen(false);
+                  }}
                   className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
                   variants={itemVariants}
                 >
                   Pricing
                 </motion.button>
                 <motion.button
+                  onClick={() => {
+                    scrollToSection("how-it-works");
+                    setIsMenuOpen(false);
+                  }}
                   className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
                   variants={itemVariants}
                 >
                   How it Works
                 </motion.button>
                 <motion.button
+                  onClick={() => {
+                    scrollToSection("contact");
+                    setIsMenuOpen(false);
+                  }}
                   className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
                   variants={itemVariants}
                 >
                   Contact
-                </motion.button>
-                <motion.button
-                  className="text-left text-gray-600 hover:text-indigo-600 transition-colors py-2 text-sm font-medium"
-                  variants={itemVariants}
-                >
-                  Blogs
                 </motion.button>
                 {user && (
                   <motion.button
@@ -230,9 +270,10 @@ export default function LandingComp({ user }: LandingCompProps) {
                 )}
                 <motion.button
                   className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-indigo-700 transition-all duration-300 w-full"
+                  onClick={handleAuth}
                   variants={itemVariants}
                 >
-                  {user ? "Sign Out" : "Get Started"}
+                  {user ? "Sign Out" : "Sign In"}
                 </motion.button>
               </motion.div>
             </motion.div>
@@ -286,7 +327,7 @@ export default function LandingComp({ user }: LandingCompProps) {
 
         {/* University Marquee */}
         <section className="py-20 relative overflow-hidden">
-        <UniversityMarquee />
+          <UniversityMarquee />
         </section>
 
         {/* Key Features Section */}
@@ -361,7 +402,7 @@ export default function LandingComp({ user }: LandingCompProps) {
         </section>
 
         {/* How it works */}
-        <section className="py-20 relative overflow-hidden">
+        <section id="how-it-works" className="py-20 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.h2
               initial={{ opacity: 0 }}
@@ -398,12 +439,12 @@ export default function LandingComp({ user }: LandingCompProps) {
         </section>
 
         {/* Feature Request / Contact */}
-        <section className="py-20">
+        <section id="contact" className="py-20">
           <FeatureRequest />
         </section>
 
         {/* Pricing */}
-        <section className="py-20 relative overflow-hidden">
+        <section id="pricing" className="py-20 relative overflow-hidden">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

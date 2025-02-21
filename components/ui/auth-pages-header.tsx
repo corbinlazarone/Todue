@@ -1,7 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function AuthHeader() {
+  const router = useRouter();
+
   return (
     <div>
       {/* Header */}
@@ -11,7 +16,10 @@ export default function AuthHeader() {
         className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 border-b border-gray-100"
       >
         <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center">
-          <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => router.push("/")}
+          >
             <Image src="/logo.png" alt="Todue logo" width={24} height={24} />
             <span className="font-bold text-lg bg-clip-text text-indigo-600">
               Todue

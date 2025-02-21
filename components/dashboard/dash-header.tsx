@@ -4,6 +4,7 @@ import { User } from "@supabase/supabase-js";
 import { LogOut, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface DashboardHeaderProps {
@@ -47,7 +48,9 @@ export default function DashboardHeader({
               {/* Profile Dropdown */}
               <div className="relative">
                 <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onClick={() => {
+                    setIsDropdownOpen(!isDropdownOpen);
+                  }}
                   className="flex items-center space-x-2"
                 >
                   <div className="relative h-8 w-8">

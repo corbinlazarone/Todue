@@ -136,7 +136,7 @@ export const signInWithGoogle = async (): Promise<AuthResponse> => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback?next=/`,
+      redirectTo: `${origin}/auth/callback?next=/dashboard`,
       scopes:
         "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
       queryParams: {
