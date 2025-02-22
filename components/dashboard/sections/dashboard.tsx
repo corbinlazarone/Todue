@@ -87,7 +87,8 @@ export default function DashboardComp({
     fetchData();
   }, []);
 
-  const toTitleCase = (str: string) => {
+  const toTitleCase = (str: string | null) => {
+    if (!str) return '';
     return str
       .toLowerCase()
       .split(' ')
