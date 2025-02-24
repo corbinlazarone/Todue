@@ -607,7 +607,7 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
                 <ul className="mt-3 space-y-2">
                   <li>
                     <a
-                      href="#"
+                      href="/tos"
                       className="text-gray-600 hover:text-indigo-600 transition cursor-pointer"
                     >
                       Terms of Service
@@ -615,7 +615,7 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
                   </li>
                   <li>
                     <a
-                      href="#"
+                      href="/privacy"
                       className="text-gray-600 hover:text-indigo-600 transition cursor-pointer"
                     >
                       Privacy Policy

@@ -4,7 +4,6 @@ import { User } from "@supabase/supabase-js";
 import { LogOut, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
 interface DashboardHeaderProps {

@@ -169,7 +169,7 @@ export default function SignUpComp() {
                     I accept the{" "}
                     <button
                       type="button"
-                      onClick={() => router.push("/terms")}
+                      onClick={() => router.push("/tos")}
                       className="text-indigo-600 hover:text-indigo-500 font-medium"
                     >
                       Terms of Service
