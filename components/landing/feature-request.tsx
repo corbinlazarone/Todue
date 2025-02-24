@@ -1,31 +1,86 @@
 "use client";
+
 import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-export default function FeatureRequest() {
+interface Alert {
+  type?: "info" | "success" | "warning" | "error";
+  message: string;
+}
+
+interface FeatureRequestProps {
+  onAlert: (alertObj: Alert) => void;
+}
+
+export default function FeatureRequest({ onAlert }: FeatureRequestProps) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     message: "",
   });
+  const [charCount, setCharCount] = useState<number>(0);
+  const CHAR_LIMIT = 1000;
 
   const handleInputChange = (event: any) => {
     const { name, value } = event.target;
+    
+    if (name === 'message') {
+      if (value.length > CHAR_LIMIT) {
+        return;
+      }
+      setCharCount(value.length);
+    }
+
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   };
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = async (event: any) => {
     event.preventDefault();
-    // Handle form submission logic here (e.g., sending data to a backend)
-    alert("Form submitted!");
-    setFormData({
-      name: "",
-      email: "",
-      message: "",
-    });
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        onAlert({
+          type: "error",
+          message: data.error,
+        })
+      }
+
+      onAlert({
+        type: "success",
+        message: data.message,
+      });
+    } catch (error: any) {
+      setIsLoading(false);
+      console.error("Unexpected Error: ", error);
+      onAlert({
+        type: "error",
+        message: "An unexpected error occurred. Please try again later.",
+      });
+    } finally {
+      setIsLoading(false);
+      setFormData({
+        fullName: "",
+        email: "",
+        message: "",
+      });
+      setCharCount(0);
+    }
   };
 
   return (
@@ -65,9 +120,9 @@ export default function FeatureRequest() {
               </label>
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
                 placeholder="John doe"
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -96,12 +151,17 @@ export default function FeatureRequest() {
           </div>
 
           <div className="flex flex-col mt-6">
-            <label
-              htmlFor="message"
-              className="text-sm font-medium text-gray-700 mb-2"
-            >
-              Message / Feature Request
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label
+                htmlFor="message"
+                className="text-sm font-medium text-gray-700"
+              >
+                Message / Feature Request
+              </label>
+              <span className={`text-sm ${charCount > CHAR_LIMIT ? 'text-red-500' : 'text-gray-500'}`}>
+                {charCount}/{CHAR_LIMIT} characters
+              </span>
+            </div>
             <textarea
               id="message"
               name="message"
@@ -109,6 +169,7 @@ export default function FeatureRequest() {
               value={formData.message}
               onChange={handleInputChange}
               rows={6}
+              maxLength={CHAR_LIMIT}
               className="border border-gray-300 rounded-lg p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
               required
             />
@@ -117,9 +178,22 @@ export default function FeatureRequest() {
           <div className="flex justify-center mt-6">
             <button
               type="submit"
-              className="bg-[#6366F1] text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-[#4F46E5] transition-all duration-300 hover:shadow-lg"
+              onClick={handleSubmit}
+              disabled={isLoading || charCount > CHAR_LIMIT}
+              className={`${
+                isLoading || charCount > CHAR_LIMIT
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#6366F1] hover:bg-[#4F46E5]'
+              } text-white px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 hover:shadow-lg`}
             >
-              Submit
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                  <span>Sending...</span>
+                </div>
+              ) : (
+                "Send Message"
+              )}
             </button>
           </div>
         </motion.form>

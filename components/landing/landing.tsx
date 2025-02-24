@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import { HeroVideoDialog } from "../ui/demo-video";
 import UniversityMarquee from "../ui/university-manquee";
 import { useRouter } from "next/navigation";
+import PopupAlert from "../ui/popup-alert";
 
 const keyFeatures = [
   {
@@ -97,6 +98,11 @@ const menuVariants = {
   },
 };
 
+interface Alert {
+  type?: "info" | "success" | "warning" | "error";
+  message: string;
+}
+
 interface LandingCompProps {
   user: User | null;
   signOut: () => void;
@@ -104,6 +110,7 @@ interface LandingCompProps {
 
 export default function LandingComp({ user, signOut }: LandingCompProps) {
   const router = useRouter();
+  const [alert, setAlert] = useState<Alert | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -125,6 +132,10 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
     }
   };
 
+  const onAlert = (alertObj: Alert) => {
+    setAlert(alertObj);
+  };
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -139,6 +150,14 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
         animate="visible"
         className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 border-b border-gray-100"
       >
+        {alert && (
+          <PopupAlert
+            message={alert.message}
+            type={alert.type}
+            duration={5000}
+            onClose={() => setAlert(null)}
+          />
+        )}
         <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           {/* Branding Section */}
           <div
@@ -454,7 +473,7 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
 
         {/* Feature Request / Contact */}
         <section id="contact" className="py-20">
-          <FeatureRequest />
+          <FeatureRequest onAlert={onAlert} />
         </section>
 
         {/* Pricing */}
