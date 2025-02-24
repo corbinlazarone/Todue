@@ -15,7 +15,12 @@ import {
   X,
 } from "lucide-react";
 import PopupAlert from "@/components/ui/popup-alert";
-import { Select, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 import { SelectTrigger } from "@radix-ui/react-select";
 import { CalendarTrigger } from "@/components/ui/calendar";
 import {
@@ -104,7 +109,7 @@ function AssignmentForm({
   });
   const [timeError, setTimeError] = useState<string | null>(null);
 
-  const validateTimes = (startTime: string , endTime: string) => {
+  const validateTimes = (startTime: string, endTime: string) => {
     if (!startTime || !endTime) return true;
 
     const [startHour, startMinute] = startTime.split(":").map(Number);
@@ -117,14 +122,20 @@ function AssignmentForm({
     endDate.setHours(endHour, endMinute, 0);
 
     return endDate > startDate;
-  }
+  };
 
-  const handleTimeChange = (field: 'start_time' | 'end_time', value: string) => {
+  const handleTimeChange = (
+    field: "start_time" | "end_time",
+    value: string
+  ) => {
     const newFormData = { ...formData, [field]: value };
     setFormData(newFormData);
 
     if (newFormData.start_time && newFormData.end_time) {
-      const isValid = validateTimes(newFormData.start_time, newFormData.end_time);
+      const isValid = validateTimes(
+        newFormData.start_time,
+        newFormData.end_time
+      );
       setTimeError(isValid ? null : "End time must be after start time");
     } else {
       setTimeError(null);
@@ -218,7 +229,7 @@ function AssignmentForm({
             <input
               type="time"
               value={formData.start_time}
-              onChange={(e) => handleTimeChange('start_time', e.target.value)}
+              onChange={(e) => handleTimeChange("start_time", e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
@@ -233,9 +244,9 @@ function AssignmentForm({
             <input
               type="time"
               value={formData.end_time}
-              onChange={(e) => handleTimeChange('end_time', e.target.value)}
+              onChange={(e) => handleTimeChange("end_time", e.target.value)}
               className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
-                timeError ? 'border-red-500' : 'border-gray-300'
+                timeError ? "border-red-500" : "border-gray-300"
               }`}
             />
           </div>
@@ -261,9 +272,7 @@ function AssignmentForm({
           <SelectContent>
             {REMINDER_OPTIONS.map((option) => (
               <SelectItem key={option.value} value={option.value.toString()}>
-                 <div className="flex items-center">
-                    {option.label}
-                  </div>
+                <div className="flex items-center">{option.label}</div>
               </SelectItem>
             ))}
           </SelectContent>
@@ -320,6 +329,49 @@ export default function DocumentUpload({
   const [showNewForm, setShowNewForm] = useState(false);
   const [uploadingToCalendar, setUploadingToCalendar] = useState(false);
 
+  const validateSyllabusFile = (file: File): boolean => {
+    // Check file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > maxSize) {
+      setAlert({
+        type: "error",
+        message: "File size must be less than 10MB",
+      });
+      return false;
+    }
+
+    // Check file type
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      setAlert({
+        type: "error",
+        message: "Invalid file type. Only PDF and Word documents are allowed.",
+      });
+      return false;
+    }
+
+    // Basic content validation by checking filename
+    const syllabusKeywords = ["syllabus", "course", "outline", "schedule"];
+    const fileName = file.name.toLowerCase();
+    const hasSyllabusKeyword = syllabusKeywords.some((keyword) =>
+      fileName.includes(keyword)
+    );
+
+    if (!hasSyllabusKeyword) {
+      setAlert({
+        type: "warning",
+        message: "Only Syllabus files are accepted.",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleExtraction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
@@ -328,6 +380,12 @@ export default function DocumentUpload({
     // check if user is authenticated with google
     if (!userAuthGoogle) {
       router.push("/sign-in?reauth=true");
+      return;
+    }
+
+    // validate file
+    if (!validateSyllabusFile(file)) {
+      setLoading(false);
       return;
     }
 
