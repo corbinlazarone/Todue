@@ -7,6 +7,7 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 import { Anthropic } from "@anthropic-ai/sdk";
 import { SupabaseClient, User } from "@supabase/supabase-js";
+import { rateLimit } from "@/utils/rate-limiter";
 
 interface FileData {
   buffer: Buffer;
@@ -155,11 +156,11 @@ const saveCourseDataToSupabase = async (
           user_email: userEmail,
           course_name: course_name,
           created_at: new Date().toISOString(),
-        }
+        },
       ])
       .select("id, course_name")
       .single();
-    
+
     if (courseError) {
       console.error("Error inserting course data:", courseError);
       throw new Error("Failed to save course data");
@@ -188,7 +189,9 @@ const saveCourseDataToSupabase = async (
           completed_at: null,
         }))
       )
-      .select('id, name, description, due_date, color, start_time, end_time, reminder');
+      .select(
+        "id, name, description, due_date, color, start_time, end_time, reminder"
+      );
 
     if (assignmentError) {
       console.error("Error inserting assignment data:", assignmentError);
@@ -199,7 +202,7 @@ const saveCourseDataToSupabase = async (
     return {
       course_id: course.id,
       course_name: course.course_name,
-      assignments: savedAssignments as Assignment[] || []
+      assignments: (savedAssignments as Assignment[]) || [],
     };
   } catch (error: any) {
     console.error("Error in saveCourseDataToSupabase:", error);
@@ -208,8 +211,11 @@ const saveCourseDataToSupabase = async (
 };
 
 export async function POST(request: NextRequest) {
-  try {
+  // Check rate limit
+  const rateLimitResult = rateLimit(request);
+  if (rateLimitResult) return rateLimitResult;
 
+  try {
     /**
      * Chceking if user is authenticated
      */
@@ -303,7 +309,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-   const savedCourseData =  await saveCourseDataToSupabase(
+    const savedCourseData = await saveCourseDataToSupabase(
       courseData,
       userAuthenticated.success as User,
       supabaseClient

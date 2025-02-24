@@ -1,4 +1,5 @@
 import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
+import { rateLimit } from "@/utils/rate-limiter";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -40,6 +41,10 @@ const deleteAssignment = async (
 };
 
 export async function DELETE(request: NextRequest) {
+  // Check rate limit
+  const rateLimitResult = rateLimit(request);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const body = await request.json();
 

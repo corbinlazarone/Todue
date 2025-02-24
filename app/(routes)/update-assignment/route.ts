@@ -1,4 +1,5 @@
 import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
+import { rateLimit } from "@/utils/rate-limiter";
 import { SupabaseClient, User } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -48,6 +49,10 @@ const updateAssignment = async (
 };
 
 export async function POST(request: NextRequest) {
+  // Check rate limit
+  const rateLimitResult = rateLimit(request);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const body = await request.json();
 

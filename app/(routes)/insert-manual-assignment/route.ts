@@ -1,4 +1,5 @@
 import { checkAuthenticatedUser, checkUserSubscription } from "@/app/helpers";
+import { rateLimit } from "@/utils/rate-limiter";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -75,6 +76,10 @@ const insertAssignment = async (
 };
 
 export async function POST(request: NextRequest) {
+  // Check rate limit
+  const rateLimitResult = rateLimit(request);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const body = await request.json();
 
@@ -132,14 +137,14 @@ export async function POST(request: NextRequest) {
         { error: "Assignment data is required" },
         { status: 400 }
       );
-    };
+    }
 
     if (!courseId) {
       return NextResponse.json(
         { error: "Course ID is required" },
         { status: 400 }
       );
-    };
+    }
 
     const insertedAssignment: AssignmentFromDB = await insertAssignment(
       courseId,

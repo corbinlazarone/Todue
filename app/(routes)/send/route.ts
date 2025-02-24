@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
 import EmailTemplate from "@/components/ui/email-template";
+import { rateLimit } from "@/utils/rate-limiter";
 
 interface FormData {
   fullName: string;
@@ -12,6 +13,11 @@ interface FormData {
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: NextRequest) {
+
+  // Check rate limit
+  const rateLimitResult = rateLimit(request);
+  if (rateLimitResult) return rateLimitResult;
+
   const body = await request.json();
 
   const formData: FormData = body;

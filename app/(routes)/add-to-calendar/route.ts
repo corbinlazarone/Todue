@@ -6,6 +6,7 @@ import {
 import { toZonedTime } from "date-fns-tz";
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
+import { rateLimit } from "@/utils/rate-limiter";
 
 interface assignment {
   id: number;
@@ -19,6 +20,10 @@ interface assignment {
 }
 
 export async function POST(request: NextRequest) {
+  // Check rate limit
+  const rateLimitResult = rateLimit(request);
+  if (rateLimitResult) return rateLimitResult;
+
   const body = await request.json();
 
   /**
