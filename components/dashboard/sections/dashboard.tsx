@@ -290,7 +290,6 @@ export default function DashboardComp({
   }
 
   const stats = getStats();
-  const COLORS = ["#4f46e5", "#e5e7eb"];
 
   return (
     <div
