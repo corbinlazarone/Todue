@@ -168,13 +168,19 @@ function AssignmentForm({
         </label>
         <textarea
           value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
+          onChange={(e) => {
+            const textLength = e.target.value.slice(0, 500);
+            setFormData({ ...formData, description: textLength });
+          }
           }
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          rows={3}
+          rows={4}
+          maxLength={500}
           placeholder="Enter description"
         />
+        <div className="text-xs text-gray-500 mt-1 text-right">
+          {formData.description.length}/500 characters
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -355,7 +361,16 @@ export default function DocumentUpload({
     }
 
     // Basic content validation by checking filename
-    const syllabusKeywords = ["syllabus", "course", "outline", "schedule"];
+    const syllabusKeywords = [
+      "syllabus",
+      "course",
+      "outline",
+      "schedule",
+      "spring",
+      "fall",
+      "winter",
+      "summer",
+    ];
     const fileName = file.name.toLowerCase();
     const hasSyllabusKeyword = syllabusKeywords.some((keyword) =>
       fileName.includes(keyword)

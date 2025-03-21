@@ -623,30 +623,6 @@ export default function LandingComp({ user, signOut }: LandingCompProps) {
                   </li>
                 </ul>
               </div>
-
-              {/* Social Media Links */}
-              <div className="flex flex-col">
-                <h3 className="text-lg font-semibold text-indigo-600">
-                  Follow Us
-                </h3>
-                <div className="mt-3 flex space-x-4">
-                  <a href="#" className="text-gray-600 transition">
-                    <Image
-                      src="/twitter.svg"
-                      alt="Twitter"
-                      width={24}
-                      height={24}
-                      className="w-6 h-6"
-                    />
-                  </a>
-                  <a href="#" className="text-gray-600 transition">
-                    <Linkedin className="w-6 h-6" />
-                  </a>
-                  <a href="#" className="text-gray-600 transition">
-                    <Instagram className="w-6 h-6" />
-                  </a>
-                </div>
-              </div>
             </div>
           </div>
 
