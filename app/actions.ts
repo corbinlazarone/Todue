@@ -1,42 +1,38 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import {
+  Alert,
+  AlertType,
+  forgotPasswordCredentials,
+  resetPasswordCredentials,
+  signInCredentials,
+  signUpCredentials,
+} from "@/utils/types";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-interface FormData {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  callbackUrl: string;
-}
-
-interface AuthResponse {
-  type?: "info" | "success" | "warning" | "error";
-  message: string;
-}
-
 export const signUpAction = async (
-  formData: FormData
-): Promise<AuthResponse> => {
-  const email = formData.email;
-  const password = formData.password;
-  const confirmPassword = formData.confirmPassword;
+  creds: signUpCredentials
+): Promise<Alert> => {
+  const email = creds.email;
+  const password = creds.password;
+  const confirmPassword = creds.confirmPassword;
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
   if (!email || !password) {
     return {
-      type: "warning",
+      type: AlertType.WARNING,
       message: "Email and password are required.",
     };
   }
 
   if (!confirmPassword) {
     return {
-      type: "warning",
-      message: "Confirm password is required."
-    }
+      type: AlertType.WARNING,
+      message: "Confirm password is required.",
+    };
   }
 
   // password validation checks
@@ -58,7 +54,7 @@ export const signUpAction = async (
 
   if (validationErrors.length > 0) {
     return {
-      type: "warning",
+      type: AlertType.WARNING,
       message:
         "Password requirements:\n" +
         validationErrors.map((error) => `• ${error}`).join("\n"),
@@ -68,12 +64,12 @@ export const signUpAction = async (
   // check if password equals confirm password
   if (password != confirmPassword) {
     return {
-      type: "warning",
+      type: AlertType.WARNING,
       message: "Passwords do not match",
     };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -84,27 +80,33 @@ export const signUpAction = async (
   if (error) {
     console.error(error.code + " " + error.message);
     return {
-      type: "error",
-      message: "Unexpected error creating your account. Please Try Again."
+      type: AlertType.ERROR,
+      message: "Unexpected error creating your account. Please Try Again.",
+    };
+  } else if (data.user?.identities?.length === 0) {
+    return {
+      type: AlertType.WARNING,
+      message: "Email is already in use. Please sign in instead.",
     };
   } else {
     return {
-      type: "success",
-      message: "Thanks for signing up! Please check your email for a verification link."
-    }
+      type: AlertType.SUCCESS,
+      message:
+        "Thanks for signing up! Please check your email for a verification link.",
+    };
   }
 };
 
 export const signInAction = async (
-  formData: FormData
-): Promise<AuthResponse> => {
-  const email = formData.email;
-  const password = formData.password;
+  creds: signInCredentials
+): Promise<Alert> => {
+  const email = creds.email;
+  const password = creds.password;
   const supabase = await createClient();
 
   if (!email || !password) {
     return {
-      type: "info",
+      type: AlertType.WARNING,
       message: "Email and password are required",
     };
   }
@@ -117,18 +119,18 @@ export const signInAction = async (
   if (error) {
     console.error(error.code + " " + error.message);
     return {
-      type: "error",
+      type: AlertType.ERROR,
       message: "Invalid Credentials. Please Try again",
     };
   }
 
   return {
-    type: "success",
+    type: AlertType.SUCCESS,
     message: "Thanks for Signing In!",
   };
 };
 
-export const signInWithGoogle = async (): Promise<AuthResponse> => {
+export const signInWithGoogle = async (): Promise<Alert> => {
   const supabase = await createClient();
   const headersList = await headers();
   const origin = headersList.get("origin") || process.env.NEXT_PUBLIC_BASE_URL;
@@ -150,9 +152,9 @@ export const signInWithGoogle = async (): Promise<AuthResponse> => {
     console.error("OAuth error:", error.message);
 
     return {
-      type: "error",
-      message: "There was problem loggin in with Google. Please Try again."
-    }
+      type: AlertType.ERROR,
+      message: "There was problem loggin in with Google. Please Try again.",
+    };
   }
 
   if (data.url) {
@@ -160,22 +162,22 @@ export const signInWithGoogle = async (): Promise<AuthResponse> => {
   }
 
   return {
-    type: "error",
-    message: "No Url was returned from Google. Please Try again."
-  }
+    type: AlertType.ERROR,
+    message: "No Url was returned from Google. Please Try again.",
+  };
 };
 
-export const forgotPasswordAction = async (formData: FormData): Promise<AuthResponse> => {
-  const email = formData.email;
+export const forgotPasswordAction = async (
+  creds: forgotPasswordCredentials
+): Promise<Alert> => {
+  const email = creds.email;
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
-  const callbackUrl = formData.callbackUrl;
 
   if (!email) {
     return {
-      type: "warning",
-      message: "Email is required"
-    }
+      type: AlertType.WARNING,
+      message: "Email is required",
+    };
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email);
@@ -183,27 +185,29 @@ export const forgotPasswordAction = async (formData: FormData): Promise<AuthResp
   if (error) {
     console.error(error.message);
     return {
-      type: "error",
-      message: "Could not reset password. Please Contact us."
-    }
+      type: AlertType.ERROR,
+      message: "Could not reset password. Please Contact us.",
+    };
   }
 
   return {
-    type: "success",
-    message: "Check your email for a link to reset your password."
-  }
+    type: AlertType.SUCCESS,
+    message: "Check your email for a link to reset your password.",
+  };
 };
 
-export const resetPasswordAction = async (formData: FormData): Promise<AuthResponse> => {
+export const resetPasswordAction = async (
+  creds: resetPasswordCredentials
+): Promise<Alert> => {
   const supabase = await createClient();
-  const password = formData.password;
-  const confirmPassword = formData.confirmPassword;
+  const password = creds.password;
+  const confirmPassword = creds.confirmPassword;
 
   if (!password || !confirmPassword) {
     return {
-      type: "warning",
-      message: "Password and confirm password are required"
-    }
+      type: AlertType.WARNING,
+      message: "Password and confirm password are required",
+    };
   }
 
   // password validation checks
@@ -225,7 +229,7 @@ export const resetPasswordAction = async (formData: FormData): Promise<AuthRespo
 
   if (validationErrors.length > 0) {
     return {
-      type: "warning",
+      type: AlertType.WARNING,
       message:
         "Password requirements:\n" +
         validationErrors.map((error) => `• ${error}`).join("\n"),
@@ -234,27 +238,34 @@ export const resetPasswordAction = async (formData: FormData): Promise<AuthRespo
 
   if (password !== confirmPassword) {
     return {
-      type: "warning",
-      message: "Passwords do not match"
-    }
+      type: AlertType.WARNING,
+      message: "Passwords do not match",
+    };
   }
 
   const { error } = await supabase.auth.updateUser({
     password: password,
   });
 
-  if (error) {
+  if (error?.code === "same_password") {
     console.error(error.code + " " + error.message);
     return {
-      type: "error",
-      message: "Unexpected error updating your password. Please try again or contact us"
-    }
+      type: AlertType.WARNING,
+      message: error.message,
+    };
+  } else if (error) {
+    console.error(error.code + " " + error.message);
+    return {
+      type: AlertType.ERROR,
+      message:
+        "Unexpected error updating your password. Please Try Again or Contact us.",
+    };
   }
 
   return {
-    type: "success",
-    message: "Password updated!"
-  }
+    type: AlertType.SUCCESS,
+    message: "Password updated!",
+  };
 };
 
 export const signOutAction = async () => {

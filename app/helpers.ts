@@ -53,7 +53,7 @@ export const checkUserSubscription = async (
 
   if (subError) {
     console.log(subError);
-    return { error: "Error fetching user subscription status" };
+    return { error: "Access denied --- Subscription required" };
   }
 
   if (!userSub?.has_access) {

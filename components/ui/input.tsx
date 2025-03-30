@@ -10,7 +10,7 @@ interface FormInputProps {
   onChange: ChangeEventHandler<HTMLInputElement>;
 }
 
-export default function FormInput({
+export function FormInput({
   id,
   required,
   labelText,

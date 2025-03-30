@@ -20,36 +20,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import PopupAlert from "../../ui/popup-alert";
+import { PopupAlert } from "../../ui/popup-alert";
 import confetti from "canvas-confetti";
-
-interface Assignment {
-  id: number;
-  name: string;
-  description: string;
-  due_date: string;
-  color: string;
-  start_time: string;
-  end_time: string;
-  reminder: number;
-  completed: boolean;
-  completed_at?: string;
-}
-
-interface CourseData {
-  id: string;
-  course_name: string;
-  created_at: string;
-  assignments: Assignment[];
-}
+import { Alert, AlertType, Assignment, CourseData } from "@/utils/types";
 
 interface ProductivityToolsProps {
   isSidebarOpen: boolean;
-}
-
-interface Alert {
-  type?: "info" | "success" | "warning" | "error";
-  message: string;
 }
 
 export default function ProductivityTools({
@@ -88,7 +64,7 @@ export default function ProductivityTools({
 
         if (data.error) {
           setAlert({
-            type: "error",
+            type: AlertType.ERROR,
             message: data.error,
           });
         }
@@ -104,7 +80,7 @@ export default function ProductivityTools({
       } catch (error: any) {
         console.error("Error occurred while fetching course history: ", error);
         setAlert({
-          type: "error",
+          type: AlertType.ERROR,
           message: "Unexpected error occurred. Please try again later.",
         });
       } finally {
@@ -163,7 +139,7 @@ export default function ProductivityTools({
     } catch (error) {
       console.error("Error updating assignment status:", error);
       setAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: "Failed to update assignment status. Please try again.",
       });
     } finally {
@@ -347,9 +323,7 @@ export default function ProductivityTools({
                           disabled={isUpdating !== null}
                         >
                           {completedAssignments.includes(assignment.id) && (
-                            <Check
-                              className="w-3 h-3 text-white"
-                            />
+                            <Check className="w-3 h-3 text-white" />
                           )}
                           {isUpdating === assignment.id && (
                             <div className="absolute inset-0 flex items-center justify-center">

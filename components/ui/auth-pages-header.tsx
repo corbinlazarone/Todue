@@ -4,7 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
-export default function AuthHeader() {
+export function AuthHeader() {
   const router = useRouter();
 
   return (

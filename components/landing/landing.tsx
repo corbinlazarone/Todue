@@ -6,11 +6,8 @@ import {
   Check,
   Edit,
   HistoryIcon,
-  Instagram,
-  Linkedin,
   Menu,
   Sparkles,
-  Sun,
   Upload,
   X,
 } from "lucide-react";
@@ -23,8 +20,9 @@ import { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { HeroVideoDialog } from "../ui/demo-video";
 import UniversityMarquee from "../ui/university-manquee";
-import { useRouter } from "next/navigation";
-import PopupAlert from "../ui/popup-alert";
+import { useRouter, useSearchParams } from "next/navigation";
+import { PopupAlert } from "../ui/popup-alert";
+import { Alert, AlertType } from "@/utils/types";
 
 const keyFeatures = [
   {
@@ -98,11 +96,6 @@ const menuVariants = {
   },
 };
 
-interface Alert {
-  type?: "info" | "success" | "warning" | "error";
-  message: string;
-}
-
 interface LandingCompProps {
   user: User | null;
   signOut: () => void;
@@ -110,8 +103,19 @@ interface LandingCompProps {
 
 export default function LandingComp({ user, signOut }: LandingCompProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [alert, setAlert] = useState<Alert | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const hasAccess = searchParams.get("has_access");
+    if (hasAccess === "false") {
+      setAlert({
+        type: AlertType.WARNING,
+        message: "Access denied --- Subscription required",
+      });
+    };
+  }, [searchParams]); 
 
   useEffect(() => {
     if (isMenuOpen) {

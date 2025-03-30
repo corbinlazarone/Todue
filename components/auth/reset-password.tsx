@@ -1,14 +1,13 @@
 "use client";
 
 import { resetPasswordAction } from "@/app/actions";
-import FormInput from "@/components/ui/input";
-import PopupAlert from "@/components/ui/popup-alert";
+import { FormInput } from "@/components/ui/input";
+import { PopupAlert } from "@/components/ui/popup-alert";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import AuthHeader from "../ui/auth-pages-header";
+import { AuthHeader } from "../ui/auth-pages-header";
 
 interface FormData {
   email: string;

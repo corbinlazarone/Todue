@@ -14,7 +14,7 @@ import {
   AlertCircle,
   X,
 } from "lucide-react";
-import PopupAlert from "@/components/ui/popup-alert";
+import { PopupAlert } from "@/components/ui/popup-alert";
 import {
   Select,
   SelectContent,
@@ -34,28 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-
-interface Alert {
-  type?: "info" | "success" | "warning" | "error";
-  message: string;
-}
-
-interface Assignment {
-  id: number;
-  name: string;
-  description: string;
-  due_date: string;
-  color: string;
-  start_time: string;
-  end_time: string;
-  reminder: number;
-}
-
-interface CourseData {
-  course_id: number;
-  course_name: string;
-  assignments: Assignment[];
-}
+import { Alert, AlertType, Assignment, CourseData } from "@/utils/types";
 
 interface AssignmentFormProps {
   assignment?: Partial<Assignment>;
@@ -340,7 +319,7 @@ export default function DocumentUpload({
     const maxSize = 10 * 1024 * 1024; // 10MB in bytes
     if (file.size > maxSize) {
       setAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: "File size must be less than 10MB",
       });
       return false;
@@ -354,7 +333,7 @@ export default function DocumentUpload({
     ];
     if (!allowedTypes.includes(file.type)) {
       setAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: "Invalid file type. Only PDF and Word documents are allowed.",
       });
       return false;
@@ -378,7 +357,7 @@ export default function DocumentUpload({
 
     if (!hasSyllabusKeyword) {
       setAlert({
-        type: "warning",
+        type: AlertType.WARNING,
         message: "Only Syllabus files are accepted.",
       });
       return false;
@@ -421,7 +400,7 @@ export default function DocumentUpload({
 
       if (data.message) {
         setAlert({
-          type: "success",
+          type: AlertType.SUCCESS,
           message: "Assignments Extracted Successfully!",
         });
       }
@@ -431,7 +410,7 @@ export default function DocumentUpload({
     } catch (error: any) {
       console.error(error);
       setAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: error.message || "Failed to extract data from document",
       });
     } finally {
@@ -479,14 +458,14 @@ export default function DocumentUpload({
 
       if (data.message) {
         setAlert({
-          type: "success",
+          type: AlertType.SUCCESS,
           message: data.message,
         });
       }
     } catch (error: any) {
       console.error("Error updating assignment: ", error);
       setAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: error.message || "Failed to update assignment",
       });
     } finally {
@@ -516,7 +495,7 @@ export default function DocumentUpload({
         },
         body: JSON.stringify({
           assignmentId: deletingAssignment.id,
-          courseId: courseData?.course_id,
+          courseId: courseData?.id,
         }),
       });
 
@@ -530,14 +509,14 @@ export default function DocumentUpload({
 
       if (data.message) {
         setAlert({
-          type: "success",
+          type: AlertType.SUCCESS,
           message: data.message,
         });
       }
     } catch (error: any) {
       console.error("Error deleting assignment: ", error);
       setAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: error.message || "Failed to delete assignment",
       });
     } finally {
@@ -558,7 +537,7 @@ export default function DocumentUpload({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          courseId: courseData?.course_id,
+          courseId: courseData?.id,
           assignment: newAssignment,
         }),
       });
@@ -577,7 +556,7 @@ export default function DocumentUpload({
 
       if (data.message) {
         setAlert({
-          type: "success",
+          type: AlertType.SUCCESS,
           message: data.message,
         });
       }
@@ -586,7 +565,7 @@ export default function DocumentUpload({
     } catch (error: any) {
       console.error(error);
       setAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: error.message || "Failed to add new assignment",
       });
     } finally {
@@ -614,7 +593,7 @@ export default function DocumentUpload({
         }
 
         setAlert({
-          type: "success",
+          type: AlertType.SUCCESS,
           message: "Assignments added to Google Calendar successfully!",
         });
       } else {
@@ -622,7 +601,7 @@ export default function DocumentUpload({
       }
     } catch (error: any) {
       setAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: "Failed to upload to calendar",
       });
     } finally {

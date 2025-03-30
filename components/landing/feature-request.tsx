@@ -1,13 +1,9 @@
 "use client";
 
+import { Alert, AlertType } from "@/utils/types";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-
-interface Alert {
-  type?: "info" | "success" | "warning" | "error";
-  message: string;
-}
 
 interface FeatureRequestProps {
   onAlert: (alertObj: Alert) => void;
@@ -56,20 +52,20 @@ export default function FeatureRequest({ onAlert }: FeatureRequestProps) {
 
       if (data.error) {
         onAlert({
-          type: "error",
+          type: AlertType.ERROR,
           message: data.error,
         })
       }
 
       onAlert({
-        type: "success",
+        type: AlertType.SUCCESS,
         message: data.message,
       });
     } catch (error: any) {
       setIsLoading(false);
       console.error("Unexpected Error: ", error);
       onAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: "An unexpected error occurred. Please try again later.",
       });
     } finally {

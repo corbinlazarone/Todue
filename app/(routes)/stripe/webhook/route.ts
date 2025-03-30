@@ -59,6 +59,8 @@ export async function POST(request: Request) {
           session.customer as string
         );
 
+        // TODO: Fix stripe customer not updating in supabase db.
+
         if (customer.deleted) {
           throw Error("Customer has been deleted");
         }

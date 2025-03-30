@@ -2,44 +2,31 @@
 
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import FormInput from "@/components/ui/input";
 import { signInAction, signInWithGoogle } from "@/app/actions";
-import PopupAlert from "@/components/ui/popup-alert";
 import { useRouter, useSearchParams } from "next/navigation";
-import AuthHeader from "../ui/auth-pages-header";
-
-interface FormData {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  callbackUrl: string;
-}
-
-interface Alert {
-  type?: "info" | "success" | "warning" | "error";
-  message: string;
-}
+import { FormInput } from "../ui/input";
+import { AuthHeader } from "../ui/auth-pages-header";
+import { PopupAlert } from "../ui/popup-alert";
+import { Alert, AlertType, signInCredentials } from "@/utils/types";
 
 export default function SignInComp() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [alert, setAlert] = useState<Alert | null>(null);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<signInCredentials>({
     email: "",
     password: "",
-    confirmPassword: "",
-    callbackUrl: "",
-  });
+  })
 
   // check for reauth parameter.
   useEffect(() => {
     const needsReauth = searchParams.get("reauth");
     if (needsReauth === "true") {
       setAlert({
-        type: "info",
+        type: AlertType.INFO,
         message: "Please sign in again with Google to continue",
       });
     };
@@ -81,7 +68,7 @@ export default function SignInComp() {
     } catch (error: any) {
       console.log("Unexpected Sign in Error: ", error);
       setAlert({
-        type: "error",
+        type: AlertType.ERROR,
         message: "Unexpected error occuried. Please Try again.",
       });
     } finally {

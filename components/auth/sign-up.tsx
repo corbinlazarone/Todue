@@ -4,34 +4,26 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import FormInput from "@/components/ui/input";
 import { signInWithGoogle, signUpAction } from "@/app/actions";
-import PopupAlert from "@/components/ui/popup-alert";
 import { useRouter } from "next/navigation";
-import AuthHeader from "@/components/ui/auth-pages-header";
-
-interface FormData {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  callbackUrl: string;
-  acceptedTerms: boolean;
-}
+import { signUpCredentials } from "@/utils/types";
+import { FormInput } from "../ui/input";
+import { PopupAlert } from "../ui/popup-alert";
+import { AuthHeader } from "../ui/auth-pages-header";
 
 interface Alert {
   type?: "info" | "success" | "warning" | "error";
   message: string;
 }
 
-export default function SignUpComp() {
+export function SignUpComp() {
   const router = useRouter();
   const [alert, setAlert] = useState<Alert | null>(null);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<signUpCredentials>({
     email: "",
     password: "",
     confirmPassword: "",
-    callbackUrl: "",
     acceptedTerms: false,
   });
 
@@ -58,7 +50,8 @@ export default function SignUpComp() {
     if (!formData.acceptedTerms) {
       setAlert({
         type: "error",
-        message: "Please accept the Terms of Service and Privacy Policy to continue.",
+        message:
+          "Please accept the Terms of Service and Privacy Policy to continue.",
       });
       return;
     }
@@ -110,7 +103,9 @@ export default function SignUpComp() {
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 Create an Account
               </h2>
-              <p className="mt-2 text-sm sm:text-base text-gray-600">Make a Todue account</p>
+              <p className="mt-2 text-sm sm:text-base text-gray-600">
+                Make a Todue account
+              </p>
             </div>
 
             <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
@@ -160,7 +155,12 @@ export default function SignUpComp() {
                     name="terms"
                     type="checkbox"
                     checked={formData.acceptedTerms}
-                    onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        acceptedTerms: e.target.checked,
+                      })
+                    }
                     className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
                   />
                 </div>

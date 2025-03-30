@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import {
   BarChart,
@@ -20,37 +22,13 @@ import {
   TrendingUp,
   Activity,
 } from "lucide-react";
-import PopupAlert from "@/components/ui/popup-alert";
+import { PopupAlert } from "@/components/ui/popup-alert";
 import { User } from "@supabase/supabase-js";
-
-interface Assignment {
-  id: number;
-  name: string;
-  description: string;
-  due_date: string;
-  color: string;
-  start_time: string;
-  end_time: string;
-  reminder: number;
-  completed?: boolean;
-  completed_at?: string;
-}
-
-interface CourseData {
-  id: string;
-  course_name: string;
-  created_at: string;
-  assignments: Assignment[];
-}
+import { Alert, AlertType, CourseData } from "@/utils/types";
 
 interface DashboardCompProps {
   isSidebarOpen?: boolean;
   user: User;
-}
-
-interface Alert {
-  type?: "info" | "success" | "warning" | "error";
-  message: string;
 }
 
 export default function DashboardComp({
@@ -76,7 +54,7 @@ export default function DashboardComp({
         setCourseData(data.data);
       } catch (error: any) {
         setAlert({
-          type: "error",
+          type: AlertType.ERROR,
           message: error.message || "Failed to fetch dashboard data",
         });
       } finally {

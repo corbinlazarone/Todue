@@ -11,7 +11,7 @@ interface AlertPropsForPopup {
   onClose: () => void;
 }
 
-export default function PopupAlert({
+export function PopupAlert({
   message,
   type = "info",
   duration = 3000,

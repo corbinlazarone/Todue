@@ -10,33 +10,11 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
-import PopupAlert from "@/components/ui/popup-alert";
-
-interface Assignment {
-  id: number;
-  name: string;
-  description: string | null;
-  due_date: string;
-  color: string;
-  start_time: string;
-  end_time: string;
-  reminder: number;
-}
-
-interface CourseData {
-  id: string;
-  course_name: string;
-  created_at: string;
-  assignments: Assignment[];
-}
+import { PopupAlert } from "@/components/ui/popup-alert";
+import { Alert, AlertType, CourseData } from "@/utils/types";
 
 interface HistoryContentProps {
   isSidebarOpen?: boolean;
-}
-
-interface Alert {
-  type?: "info" | "success" | "warning" | "error";
-  message: string;
 }
 
 export default function HistoryContent({
@@ -56,7 +34,7 @@ export default function HistoryContent({
 
         if (data.error) {
           setAlert({
-            type: "error",
+            type: AlertType.ERROR,
             message: data.error,
           });
         }
@@ -65,7 +43,7 @@ export default function HistoryContent({
       } catch (error: any) {
         console.error("Error occurred while fetching course history: ", error);
         setAlert({
-          type: "error",
+          type: AlertType.ERROR,
           message: "Unexpected error occurred. Please try again later.",
         });
       } finally {

@@ -64,13 +64,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (userSubscription.error === "Error fetching user subscription status") {
-      return NextResponse.json(
-        { error: userSubscription.error },
-        { status: 500 }
-      );
-    }
-
     /**
      * Supabase db query to fetch user extraction history
      */
